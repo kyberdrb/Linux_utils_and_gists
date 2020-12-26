@@ -19,7 +19,14 @@ set_up_pikaur() {
 }
 
 update_pacman_mirror_servers() {
+  local current_working_dir="$(pwd)"
+  local script_dir="$(dirname $(readlink -f $0))"
+
+  cd "$script_dir"
+
   ./utils/update_pacman_mirror_servers.sh
+
+  cd "$current_working_dir"
 }
 
 update_arch_linux_keyring() {
@@ -27,7 +34,7 @@ update_arch_linux_keyring() {
   echo "Update Arch Linux keyring to avoid PGP signature errors"
   echo
 
-  pikaur --sync --refresh --refresh --noconfirm archlinux-keyring 
+  pikaur --sync --refresh --refresh --noconfirm archlinux-keyring chaotic-keyring
   sudo pacman-key --populate
 
   # In case of emergency, refresh keys in keyring - it can take several minutes
@@ -35,7 +42,14 @@ update_arch_linux_keyring() {
 }
 
 remount_boot_partition_as_writable() {
+  local current_working_dir="$(pwd)"
+  local script_dir="$(dirname $(readlink -f $0))"
+
+  cd "$script_dir"
+
   ./utils/remount_boot_part_as_writable.sh
+
+  cd "$current_working_dir"
 }
 
 upgrade_packages() {

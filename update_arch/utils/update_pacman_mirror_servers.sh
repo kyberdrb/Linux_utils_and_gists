@@ -61,7 +61,7 @@ update_pacman_mirror_servers() {
 
     echo "Backing up current mirrorlist"
 
-    BACKUP_TIME_AND_DATE=$(date "+%Y_%M_%d-%H_%M_%S")
+    BACKUP_TIME_AND_DATE=$(date "+%Y_%m_%d-%H_%M_%S")
     sudo cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-${BACKUP_TIME_AND_DATE}.bak
 
     echo "Backed up mirrorlist file is located at"
