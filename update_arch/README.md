@@ -20,3 +20,9 @@ https://stackoverflow.com/questions/1251999/how-can-i-replace-a-newline-n-using-
 
 https://phoenixnap.com/kb/grep-multiple-strings
 
+---
+
+https://wiki.archlinux.org/index.php/Unofficial_user_repositories/Repo-ck#Add_Repo
+
+https://lonewolf.pedrohlc.com/chaotic-aur/
+

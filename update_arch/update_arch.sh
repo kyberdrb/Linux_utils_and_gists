@@ -37,6 +37,17 @@ update_arch_linux_keyring() {
   pikaur --sync --refresh --refresh --noconfirm archlinux-keyring chaotic-keyring
   sudo pacman-key --populate
 
+  # Add GPG key for ck repository
+  sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net && sudo pacman-key --lsign-key 5EE46C4C
+
+  # Add GPG key for chaotic repository
+  sudo pacman-key --keyserver hkp://keyserver.ubuntu.com -r 3056513887B78AEB 8A9E14A07010F7E3
+  sudo pacman-key --lsign-key 3056513887B78AEB
+  sudo pacman-key --lsign-key 8A9E14A07010F7E3
+
+  # Add GPG key for post-factum repository
+  sudo pacman-key --recv-keys 95C357D2AF5DA89D && sudo pacman-key --lsign-key 95C357D2AF5DA89D
+
   # In case of emergency, refresh keys in keyring - it can take several minutes
   #sudo pacman-key --refresh-keys
 }
