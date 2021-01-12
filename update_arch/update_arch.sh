@@ -34,19 +34,79 @@ update_arch_linux_keyring() {
   echo "Update Arch Linux keyring to avoid PGP signature errors"
   echo
 
-  pikaur --sync --refresh --refresh --noconfirm archlinux-keyring chaotic-keyring
-  sudo pacman-key --populate
+  echo
+  echo "================"
+  echo "Cleanup GPG keys"
+  echo "================"
+  echo
+  # https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082
 
-  # Add GPG key for ck repository
-  sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net && sudo pacman-key --lsign-key 5EE46C4C
+  sudo rm -R /etc/pacman.d/gnupg/
+  sudo rm -R /root/.gnupg/
 
-  # Add GPG key for chaotic repository
-  sudo pacman-key --keyserver hkp://keyserver.ubuntu.com -r 3056513887B78AEB 8A9E14A07010F7E3
-  sudo pacman-key --lsign-key 3056513887B78AEB
-  sudo pacman-key --lsign-key 8A9E14A07010F7E3
+  echo
+  echo "========================="
+  echo "Initialize pacman keyring"
+  echo "========================="
+  echo
+
+  sudo pacman-key --init
+
+  echo
+  echo "================"
+  echo "Refresh GPG keys"
+  echo "================"
+  echo
+
+  sudo gpg --refresh-keys
+  sudo pacman-key --populate archlinux
+
+  echo
+  echo "==================================="
+  echo "Add GPG key for liquorix repository"
+  echo "==================================="
+  echo
+
+  sudo pacman-key --keyserver hkps.pool.sks-keyservers.net --recv-keys 9AE4078033F8024D
+  sudo pacman-key --lsign-key 9AE4078033F8024D
+  sudo gpg --keyserver hkps.pool.sks-keyservers.net --recv-keys 9AE4078033F8024D
+  gpg --lsign-key 9AE4078033F8024D
+
+  echo
+  echo "==================================="
+  echo "Add GPG key for ck repository - graysky"
+  echo "==================================="
+  echo
+   
+  echo pacman recv
+  sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net
+  echo pacman sign
+  sudo pacman-key --lsign-key 5EE46C4C
+  echo gpg recv
+  sudo gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 5EE46C4C
+  echo gpg sign
+  sudo gpg --quick-lsign-key 5EE46C4C
 
   # Add GPG key for post-factum repository
-  sudo pacman-key --recv-keys 95C357D2AF5DA89D && sudo pacman-key --lsign-key 95C357D2AF5DA89D
+  sudo pacman-key --recv-keys 95C357D2AF5DA89D
+  sudo pacman-key --lsign-key 95C357D2AF5DA89D
+  gpg --recv-keys 95C357D2AF5DA89D
+  gpg --lsign-key 95C357D2AF5DA89D
+
+  # Add GPG key for chaotic-repo: Pedro Henrique Lara Campos - pedrohlc
+  sudo pacman-key --recv-keys 3056513887B78AEB
+  sudo pacman-key --lsign-key 3056513887B78AEB
+  gpg --recv-keys 3056513887B78AEB
+  gpg --lsign-key 3056513887B78AEB 
+
+  echo
+  echo "==============="
+  echo "Uprade keyrings"
+  echo "==============="
+  echo
+
+  pikaur --sync --refresh --refresh --noconfirm archlinux-keyring
+  pikaur --sync --refresh --refresh --noconfirm chaotic-keyring
 
   # In case of emergency, refresh keys in keyring - it can take several minutes
   #sudo pacman-key --refresh-keys
