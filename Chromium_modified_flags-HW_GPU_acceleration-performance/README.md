@@ -6,7 +6,8 @@ What to do with the `chromium-flags.conf.*` files? Choose the one corresponding 
 
 Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) and AMD Radeon 8400/AMD Radeon R3 of AMD Athlon 5350 APU (Kabini)
 
-- If screen tearing is still present, sometimes `--use-gl=desktop` can fixes the tearing. Source: https://wiki.archlinux.org/index.php/Chromium#
+- If screen tearing is still present, sometimes `--use-gl=desktop` can fixes the tearing. Source: [Arch Linux - Chromium](https://wiki.archlinux.org/index.php/Chromium#)
+    - `--use-gl=desktop` [enables `MojoVideoDecoder`, i. e. VAAPI acceleration in Chromium](https://github.com/saiarcot895/chromium-ubuntu-build/issues/98#issuecomment-711220942) on AMD Radeon R3/8400 and, apparently Intel GPUs, although mine HD 520 worked with Chromium, and libva hybrid drivers or intel media drivers for VAAPI acceleration, out of the box
     - `--enable-oop-rasterization` enables `Out-of-process Rasterization: Hardware accelerated` in `chrome://gpu` - [Chromium flags](https://www.reddit.com/r/vscode/comments/fp6zao/how_do_i_pass_chromium_flags_to_vs_code/)
     - `--disable-gpu-driver-bug-workarounds` sometimes lowers the CPU strain at video playback - [Chromium screen tearing fix](https://www.reddit.com/r/archlinux/comments/8n5w7z/chromiumchrome_full_screen_videos_screen_tearing/), [Chromium screen tearing fix - original answer](https://bbs.archlinux.org/viewtopic.php?pid=1788065#p1788065)
     - `--enable-zero-copy` changes `Tile Update Mode` from `One-copy` to `Zero-copy` - faster rendering - [Source](https://www.ghacks.net/2017/01/31/chromes-rendering-gets-faster-here-is-what-google-does-not-tell-you/)
@@ -21,8 +22,10 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
 
 Example of `chromium-flags.conf` for full HW video acceleration - https://bbs.archlinux.org/viewtopic.php?pid=1868591#p1868591
 
-egl backend broken - https://bbs.archlinux.org/viewtopic.php?pid=1923456#p1923456
+egl backend broken :( - using `--use-gl=desktop` instead - https://bbs.archlinux.org/viewtopic.php?pid=1923456#p1923456
 
 desktop backend possibly working - https://bbs.archlinux.org/viewtopic.php?pid=1923532#p1923532
 
+[Chromium is intermittently very choppy](https://bbs.archlinux.org/viewtopic.php?pid=1788065#p1788065)
 
+[VAAPI/Intel acceleration in Chromium 87 on Ubuntu 20.04 broken on initialization with `VDA Error 4` #98](https://github.com/saiarcot895/chromium-ubuntu-build/issues/98#issuecomment-711220942)
