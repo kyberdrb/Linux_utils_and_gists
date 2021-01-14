@@ -1,5 +1,9 @@
 #!/bin/bash
 
+request_sudo_password() {
+  sudo ls -d
+}
+
 set_up_pikaur() {
   PIKAUR_INSTALLED=$(pacman -Q | grep pikaur)
   if [[ -z $PIKAUR_INSTALLED ]]; then 
@@ -60,6 +64,7 @@ update_arch_linux_keyring() {
 
   sudo rm -R /etc/pacman.d/gnupg/
   sudo rm -R /root/.gnupg/
+  rm -rf ~/.gnupg/
 
   echo
   echo "========================="
@@ -68,6 +73,8 @@ update_arch_linux_keyring() {
   echo
 
   sudo pacman-key --init
+  echo "keyserver hkp://keyserver.ubuntu.com" | sudo tee --append "/etc/pacman.d/gnupg/gpg.conf"
+
 
   echo
   echo "================"
@@ -80,14 +87,25 @@ update_arch_linux_keyring() {
 
   echo
   echo "==================================="
+  echo "Add GPG key for seblu repository"
+  echo "==================================="
+  echo
+
+  sudo pacman-key --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
+  sudo pacman-key --lsign-key 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
+  #gpg --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
+  #gpg --quick-lsign-key 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
+
+  echo
+  echo "==================================="
   echo "Add GPG key for liquorix repository"
   echo "==================================="
   echo
 
-  sudo pacman-key --keyserver hkps.pool.sks-keyservers.net --recv-keys 9AE4078033F8024D
+  sudo pacman-key --recv-keys 9AE4078033F8024D
   sudo pacman-key --lsign-key 9AE4078033F8024D
-  sudo gpg --keyserver hkps.pool.sks-keyservers.net --recv-keys 9AE4078033F8024D
-  gpg --lsign-key 9AE4078033F8024D
+  #gpg --recv-keys 9AE4078033F8024D
+  #gpg --lsign-key 9AE4078033F8024D
 
   echo
   echo "==================================="
@@ -99,22 +117,18 @@ update_arch_linux_keyring() {
   sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net
   echo pacman sign
   sudo pacman-key --lsign-key 5EE46C4C
-  echo gpg recv
-  sudo gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 5EE46C4C
-  echo gpg sign
-  sudo gpg --quick-lsign-key 5EE46C4C
 
   # Add GPG key for post-factum repository
-  sudo pacman-key --recv-keys 95C357D2AF5DA89D
+  sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
   sudo pacman-key --lsign-key 95C357D2AF5DA89D
-  gpg --recv-keys 95C357D2AF5DA89D
-  gpg --lsign-key 95C357D2AF5DA89D
+  #gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
+  #gpg --quick-lsign-key 95C357D2AF5DA89D
 
   # Add GPG key for chaotic-repo: Pedro Henrique Lara Campos - pedrohlc
-  sudo pacman-key --recv-keys 3056513887B78AEB
+  sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
   sudo pacman-key --lsign-key 3056513887B78AEB
-  gpg --recv-keys 3056513887B78AEB
-  gpg --lsign-key 3056513887B78AEB 
+  #gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
+  #gpg --lsign-key 3056513887B78AEB 
 
   echo
   echo "==============="
@@ -123,7 +137,16 @@ update_arch_linux_keyring() {
   echo
 
   pikaur --sync --refresh --refresh --noconfirm archlinux-keyring
-  pikaur --sync --refresh --refresh --noconfirm chaotic-keyring
+
+  echo
+  echo "For chaotic-aur repo setup, see page"
+  echo "    https://lonewolf.pedrohlc.com/chaotic-aur/"
+  pikaur --sync --refresh --refresh --noconfirm chaotic-keyring 
+  
+  echo
+  echo "chaotic-mirrorlist adds separate mirrorlist file in"
+  echo "    /etc/pacman.d/chaotic-mirrorlist"
+  pikaur --sync --refresh --refresh --noconfirm chaotic-mirrorlist
 
   # In case of emergency, refresh keys in keyring - it can take several minutes
   #sudo pacman-key --refresh-keys
@@ -151,6 +174,7 @@ upgrade_packages() {
       --sysupgrade --sysupgrade \
       --noedit \
       --nodiff \
+      --noconfirm \
       --overwrite /usr/lib/p11-kit-trust.so \
       --overwrite /usr/bin/fwupdate \
       --overwrite /usr/share/man/man1/fwupdate.1.gz
@@ -177,6 +201,7 @@ finalize() {
 }
 
 main() {
+  request_sudo_password
   set_up_pikaur
   update_repo_of_this_script
   update_pacman_mirror_servers
