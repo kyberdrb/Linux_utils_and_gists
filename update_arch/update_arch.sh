@@ -18,6 +18,23 @@ set_up_pikaur() {
   echo
 }
 
+update_repo_of_this_script() {
+  local git_pull_status=$(git -C "$(dirname $(readlink -f ~/update_arch.sh))" pull)
+
+  echo "$git_pull_status" | grep --invert-match "Already up to date."
+
+  test $? -eq 0
+
+  local is_local_repo_behind="$?"
+  if [[ is_local_repo_behind -eq 0 ]]; then
+    echo "Repository updated."
+    echo "Please, run the script again."
+    exit 1
+  fi
+
+  echo "Local repo already up to date."
+}
+
 update_pacman_mirror_servers() {
   local current_working_dir="$(pwd)"
   local script_dir="$(dirname $(readlink -f $0))"
@@ -161,6 +178,7 @@ finalize() {
 
 main() {
   set_up_pikaur
+  update_repo_of_this_script
   update_pacman_mirror_servers
   update_arch_linux_keyring
   remount_boot_partition_as_writable
