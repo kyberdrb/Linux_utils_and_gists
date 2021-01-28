@@ -5,7 +5,7 @@ request_sudo_password() {
 }
 
 set_up_pikaur() {
-  PIKAUR_INSTALLED=$(pacman -Q | grep pikaur)
+  PIKAUR_INSTALLED=$(pacman --query | grep pikaur)
   if [[ -z $PIKAUR_INSTALLED ]]; then 
     rm -rf /tmp/pikaur-git
     mkdir /tmp/pikaur-git
@@ -14,7 +14,7 @@ set_up_pikaur() {
     cd /tmp/pikaur-git/pikaur-git
     makepkg --ignorearch --clean --syncdeps --noconfirm
     PIKAUR_PACKAGE_NAME=$(ls *.tar*)
-    sudo pacman -U $PIKAUR_PACKAGE_NAME --noconfirm
+    sudo pacman --upgrade $PIKAUR_PACKAGE_NAME --noconfirm
     rm -rf /tmp/pikaur-git
   fi
 
@@ -48,6 +48,10 @@ update_pacman_mirror_servers() {
   ./utils/update_pacman_mirror_servers.sh
 
   cd "$current_working_dir"
+
+  # TODO generate also mirrorlist via 'reflector'
+  #  save it to a separate file
+  #  and then iterate both files to generate a third file which will contain the intersection of both files
 }
 
 update_arch_linux_keyring() {
@@ -60,7 +64,9 @@ update_arch_linux_keyring() {
   echo "Cleanup GPG keys"
   echo "================"
   echo
-  # https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082
+  echo Source:
+  echo   https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082
+  echo
 
   sudo rm -R /etc/pacman.d/gnupg/
   sudo rm -R /root/.gnupg/
@@ -82,8 +88,8 @@ update_arch_linux_keyring() {
   echo "================"
   echo
 
-  sudo gpg --refresh-keys
   sudo pacman-key --populate archlinux
+  sudo gpg --refresh-keys
 
   echo
   echo "==================================="
@@ -93,63 +99,65 @@ update_arch_linux_keyring() {
 
   sudo pacman-key --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
   sudo pacman-key --lsign-key 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
-  #gpg --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
-  #gpg --quick-lsign-key 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
 
   echo
   echo "==================================="
-  echo "Add GPG key for liquorix repository"
+  echo "Add GPG key for 'liquorix' repository"
   echo "==================================="
   echo
 
   sudo pacman-key --recv-keys 9AE4078033F8024D
   sudo pacman-key --lsign-key 9AE4078033F8024D
-  #gpg --recv-keys 9AE4078033F8024D
-  #gpg --lsign-key 9AE4078033F8024D
 
   echo
   echo "==================================="
-  echo "Add GPG key for ck repository - graysky"
+  echo "Add GPG key for 'ck' repository - graysky"
   echo "==================================="
   echo
    
-  echo pacman recv
   sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net
-  echo pacman sign
   sudo pacman-key --lsign-key 5EE46C4C
 
-  # Add GPG key for post-factum repository
+  echo
+  echo "==================================="
+  echo "Add GPG key for 'post-factum' repository"
+  echo "==================================="
+  echo
+
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
   sudo pacman-key --lsign-key 95C357D2AF5DA89D
-  #gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
-  #gpg --quick-lsign-key 95C357D2AF5DA89D
-
-  # Add GPG key for chaotic-repo: Pedro Henrique Lara Campos - pedrohlc
+ 
+  echo
+  echo "==================================="
+  echo "Add GPG key for 'chaotic' repository: Pedro Henrique Lara Campos - pedrohlc"
+  echo "==================================="
+  echo
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
   sudo pacman-key --lsign-key 3056513887B78AEB
-  #gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
-  #gpg --lsign-key 3056513887B78AEB 
 
   echo
   echo "==============="
-  echo "Uprade keyrings"
+  echo "Uprade keyrings and additional mirrorlists for repositories"
   echo "==============="
   echo
 
-  pikaur --sync --refresh --refresh --noconfirm archlinux-keyring
+  pikaur --sync --refresh --refresh --verbose
+
+  pikaur --sync --refresh --noconfirm --verbose archlinux-keyring
+
+  echo 
+  echo "'chaotic-mirrorlist' adds separate mirrorlist file in"
+  echo "    /etc/pacman.d/chaotic-mirrorlist"
+  echo
+
+  pikaur --sync --refresh --noconfirm --verbose chaotic-mirrorlist
 
   echo
   echo "For chaotic-aur repo setup, see page"
   echo "    https://lonewolf.pedrohlc.com/chaotic-aur/"
-  pikaur --sync --refresh --refresh --noconfirm chaotic-keyring 
-  
   echo
-  echo "chaotic-mirrorlist adds separate mirrorlist file in"
-  echo "    /etc/pacman.d/chaotic-mirrorlist"
-  pikaur --sync --refresh --refresh --noconfirm chaotic-mirrorlist
 
-  # In case of emergency, refresh keys in keyring - it can take several minutes
-  #sudo pacman-key --refresh-keys
+  pikaur --sync --refresh --noconfirm --verbose chaotic-keyring 
 }
 
 remount_boot_partition_as_writable() {
@@ -168,10 +176,14 @@ upgrade_packages() {
   echo "Updating and upgrading packages"
   echo
       
+  # TODO use 'powerpill' for parallel downloading
+  #  then pikaur to download the upgrades for the AUR packages
+
   pikaur \
       --sync \
       --refresh --refresh \
       --sysupgrade --sysupgrade \
+      --verbose \
       --noedit \
       --nodiff \
       --noconfirm \

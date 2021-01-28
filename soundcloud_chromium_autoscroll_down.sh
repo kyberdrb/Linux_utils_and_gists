@@ -11,7 +11,7 @@ selectChromiumWindow() {
 }
 
 switchToSoundCloudTab() {
-    xdotool key ctrl+8
+    xdotool key ctrl+7
 }
 
 keepScrollingDown() {
@@ -47,10 +47,7 @@ main() {
 
 main
 
-# TODO move all github gists to a new separate repo Linux_utils
-# TODO create separate dir in repo Linux_utils for this script
 # TODO all comments to README.md
-# TODO create guide for downloading m4s stream - InviDownloader - Windows VM - Windows tutorials
 
 #Sources:
 # https://unix.stackexchange.com/questions/267704/command-to-simulate-keyboard-input/267705#267705
