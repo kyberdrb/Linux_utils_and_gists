@@ -49,9 +49,24 @@ update_pacman_mirror_servers() {
 
   cd "$current_working_dir"
 
-  # TODO generate also mirrorlist via 'reflector'
+  # TODO generate also mirrorlist via
+  #
+  #reflector \
+  #  --verbose
+  #  --country 'Slovakia' \
+  #  --country 'Czechia' \
+  #  --country 'Poland' \
+  #  --country 'Hungary' \
+  #  --country 'Ukraine' \
+  #  --country 'Austria'\
+  #  --country 'Germany' \
+  #  --protocol http --protocol https \
+  #  --sort rate | sudo tee /etc/pacman.d/mirrorlist > /dev/null 2>&1
+  #
   #  save it to a separate file
   #  and then iterate both files to generate a third file which will contain the intersection of both files
+  
+  # TODO add reflector arguments to 'powerpill' config in '/etc/powerpill/powerpill.json'
 }
 
 update_arch_linux_keyring() {
