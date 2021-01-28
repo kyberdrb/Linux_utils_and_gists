@@ -22,6 +22,10 @@ set_up_pikaur() {
   echo
 }
 
+# TODO add function 'install_script_dependencies':
+# - powerpill
+# - reflector
+
 update_repo_of_this_script() {
   local git_pull_status=$(git -C "$(dirname $(readlink -f ~/update_arch.sh))" pull)
 
