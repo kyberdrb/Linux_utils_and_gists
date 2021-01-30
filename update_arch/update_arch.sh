@@ -151,6 +151,8 @@ update_arch_linux_keyring() {
   echo "==========================================================="
   echo
 
+  # TODO add "~/.config/pikaur.conf" and "/etc/pacman.conf" to this repo into 'configs' dir
+  #  and link these configuration file explicitly into all 'pikaur' command invocations
   pikaur --sync --refresh --refresh --verbose
 
   pikaur --sync --refresh --noconfirm --verbose archlinux-keyring
@@ -221,6 +223,8 @@ upgrade_packages() {
   echo " https://bbs.archlinux.org/viewtopic.php?pid=1254940#p1254940"
   echo
 
+  # TODO add "/etc/powerpill/powerpill.json" and "/etc/pacman.conf" to this repo into 'configs' dir
+  #  and link these configuration file explicitly into all 'powerpill' command invocations
   sudo powerpill \
       --sync \
       --refresh --refresh \
