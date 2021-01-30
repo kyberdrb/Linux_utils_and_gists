@@ -11,6 +11,10 @@ update_pacman_mirror_servers() {
     echo "Downloading current status of Arch Linux mirror servers"
     echo
 
+    # The easy way ^_^ that sometimes fails
+    # reflector --latest 50 --protocol http,https,rsync --verbose --country Slovakia --country Czechia --country Poland --country Hungary --country Ukraine --country Austria --country Germany | sudo tee /etc/pacman.d/mirrorlist
+
+    # The hard way `_´ that always works :D
     curl -L "https://www.archlinux.org/mirrors/status/" -o ~/Arch_Linux-Mirrors-Status.html
 
     echo "Finding the table with the fully synced mirrors"
@@ -30,7 +34,7 @@ update_pacman_mirror_servers() {
 
     echo "Transforming HTML table to CSV format"
 
-    cat ~/Arch_Linux-Mirrors-Status-Successful_Mirrors_Table_Only.html | sed '/<a href/d' | sed 's/^[\ \t]*//g' | grep -i -e '<td>\|<tr>' | sed 's/<tr>//Ig' | sed '/^$/d' | sed 's/<\/td>/,/Ig' | sed 's/<td>//Ig' | tr --delete '\n' | sed 's/<\/tr>/\n/Ig' | sed 's/,$//g' > ~/mirrorlist.csv
+    cat ~/Arch_Linux-Mirrors-Status-Successful_Mirrors_Table_Only.html | sed '/<a href/d' | sed 's/^[\ \t]*//g' | grep -i -e "<td\|<tr>" | sed 's/<tr>//Ig'| sed '/^$/d' | sed 's/<\/td>/,/Ig' | sed 's/<td>//Ig' | sed 's/span /\n/Ig' | sed 's/<\/span> /\n/Ig' | sed '/^<td class/d' | sed '/^class/d' | tr --delete '\n' | sed 's/<\/tr>/\n/Ig' | sed 's/,$//g' | grep "Slovakia\|Czechia\|Poland\|Hungary\|Ukraine\|Austria\|\Germany" > ~/mirrorlist.csv
 
     echo "Extracting only the first column - the URLs of the servers - from the CSV file"
     echo

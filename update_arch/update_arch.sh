@@ -13,18 +13,15 @@ set_up_pikaur() {
     tar -xvzf /tmp/pikaur-git.tar.gz --directory /tmp/pikaur-git
     cd /tmp/pikaur-git/pikaur-git
     makepkg --ignorearch --clean --syncdeps --noconfirm
-    PIKAUR_PACKAGE_NAME=$(ls *.tar*)
-    sudo pacman --upgrade $PIKAUR_PACKAGE_NAME --noconfirm
+    PIKAUR_PACKAGE_NAME=$(ls -- *.tar*)
+    sudo pacman --upgrade "$PIKAUR_PACKAGE_NAME" --noconfirm
     rm -rf /tmp/pikaur-git
   fi
 
-  echo "'pikaur' package installed - Arch User Repository Package Helper present"
+  echo "'pikaur' package installed:"
+  echo 'Arch User Repository (AUR) Package Helper present'
   echo
 }
-
-# TODO add function 'install_script_dependencies':
-# - powerpill
-# - reflector
 
 update_repo_of_this_script() {
   local git_pull_status=$(git -C "$(dirname $(readlink -f ~/update_arch.sh))" pull)
@@ -52,25 +49,6 @@ update_pacman_mirror_servers() {
   ./utils/update_pacman_mirror_servers.sh
 
   cd "$current_working_dir"
-
-  # TODO generate also mirrorlist via
-  #
-  #reflector \
-  #  --verbose
-  #  --country 'Slovakia' \
-  #  --country 'Czechia' \
-  #  --country 'Poland' \
-  #  --country 'Hungary' \
-  #  --country 'Ukraine' \
-  #  --country 'Austria'\
-  #  --country 'Germany' \
-  #  --protocol http --protocol https \
-  #  --sort rate | sudo tee /etc/pacman.d/mirrorlist > /dev/null 2>&1
-  #
-  #  save it to a separate file
-  #  and then iterate both files to generate a third file which will contain the intersection of both files
-  
-  # TODO add reflector arguments to 'powerpill' config in '/etc/powerpill/powerpill.json'
 }
 
 update_arch_linux_keyring() {
@@ -102,62 +80,75 @@ update_arch_linux_keyring() {
 
 
   echo
-  echo "================"
-  echo "Refresh GPG keys"
-  echo "================"
+  echo "====================================================="
+  echo "Add GPG keys for custom repositories and AUR packages"
+  echo "====================================================="
   echo
 
   sudo pacman-key --populate archlinux
   sudo gpg --refresh-keys
 
   echo
-  echo "==================================="
-  echo "Add GPG key for seblu repository"
-  echo "==================================="
+  echo "+----------------------------------+"
+  echo "| Add GPG key for seblu repository |"
+  echo "+----------------------------------+"
   echo
 
   sudo pacman-key --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
   sudo pacman-key --lsign-key 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
 
   echo
-  echo "==================================="
+  echo "====================================="
   echo "Add GPG key for 'liquorix' repository"
-  echo "==================================="
+  echo "====================================="
   echo
 
   sudo pacman-key --recv-keys 9AE4078033F8024D
   sudo pacman-key --lsign-key 9AE4078033F8024D
 
   echo
-  echo "==================================="
+  echo "========================================="
   echo "Add GPG key for 'ck' repository - graysky"
-  echo "==================================="
+  echo "========================================="
   echo
    
   sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net
   sudo pacman-key --lsign-key 5EE46C4C
 
   echo
-  echo "==================================="
+  echo "========================================"
   echo "Add GPG key for 'post-factum' repository"
-  echo "==================================="
+  echo "========================================"
   echo
 
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
   sudo pacman-key --lsign-key 95C357D2AF5DA89D
  
   echo
-  echo "==================================="
-  echo "Add GPG key for 'chaotic' repository: Pedro Henrique Lara Campos - pedrohlc"
-  echo "==================================="
+  echo "====================================="
+  echo "Add GPG key for 'chaotic' repository:"
+  echo "Pedro Henrique Lara Campos - pedrohlc"
+  echo "====================================="
   echo
+
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
   sudo pacman-key --lsign-key 3056513887B78AEB
 
   echo
-  echo "==============="
+  echo "======================================================================"
+  echo "Add GPG key for Pedram Pourang - tsujan"
+  echo "Required when building 'compton-conf' AUR package"
+  echo '  see (https://aur.archlinux.org/packages/compton-conf/#pinned-742136)'
+  echo "======================================================================"
+  echo
+
+  gpg --recv-keys BE793007AD22DF7E
+  gpg --lsign-key BE793007AD22DF7E
+
+  echo
+  echo "==========================================================="
   echo "Uprade keyrings and additional mirrorlists for repositories"
-  echo "==============="
+  echo "==========================================================="
   echo
 
   pikaur --sync --refresh --refresh --verbose
@@ -166,14 +157,14 @@ update_arch_linux_keyring() {
 
   echo 
   echo "'chaotic-mirrorlist' adds separate mirrorlist file in"
-  echo "    /etc/pacman.d/chaotic-mirrorlist"
+  echo " /etc/pacman.d/chaotic-mirrorlist"
   echo
 
   pikaur --sync --refresh --noconfirm --verbose chaotic-mirrorlist
 
   echo
   echo "For chaotic-aur repo setup, see page"
-  echo "    https://lonewolf.pedrohlc.com/chaotic-aur/"
+  echo " https://lonewolf.pedrohlc.com/chaotic-aur/"
   echo
 
   pikaur --sync --refresh --noconfirm --verbose chaotic-keyring 
@@ -190,13 +181,61 @@ remount_boot_partition_as_writable() {
   cd "$current_working_dir"
 }
 
+install_script_dependencies() {
+  echo
+  echo "=============================="
+  echo "Installing script dependencies"
+  echo "=============================="
+
+  echo
+  echo "--------------------------"
+  echo "Install dependent packages"
+  echo "--------------------------"
+  echo 
+
+  pikaur --sync --refresh --refresh --needed --noconfirm \
+    pikaur powerpill reflector rsync
+}
+
 upgrade_packages() {
   echo
+  echo "==============================="
   echo "Updating and upgrading packages"
+  echo "==============================="
+  echo 
+
   echo
-      
-  # TODO use 'powerpill' for parallel downloading
-  #  then pikaur to download the upgrades for the AUR packages
+  echo "------------------------"
+  echo "Clear 'pacman' databases"
+  echo "------------------------"
+  echo 
+
+  sudo rm -rf /var/lib/pacman/sync/*
+
+  echo
+  echo "Pacman configuration file '/etc/pacman.conf'"
+  echo "had been patched for 'powerpill' to resolve error messages"
+  echo "according to"
+  echo " https://wiki.archlinux.org/index.php/Powerpill#Troubleshooting"
+  echo "and"
+  echo " https://bbs.archlinux.org/viewtopic.php?pid=1254940#p1254940"
+  echo
+
+  sudo powerpill \
+      --sync \
+      --refresh --refresh \
+      --sysupgrade --sysupgrade \
+      --verbose \
+      --noconfirm
+
+  echo
+  echo "==================================================="
+  echo "Updating and upgrading packages AUR packages"
+  echo "and official packages that haven't been updated yet"
+  echo "to the latest version"
+  echo "or haven't been updated at all"
+  echo "==================================================="
+  echo 
 
   pikaur \
       --sync \
@@ -223,11 +262,14 @@ finalize() {
   echo "Finalizing upgrade"
 
   echo
-  echo "**************************************************************************"
+  echo "=========================================="
   echo
-  echo Please, reboot to apply updates for kernel, firmware, graphics drivers or other drivers and services requiring service restart or system reboot.
+  echo Please, reboot to apply updates 
+  echo for kernel, firmware, graphics drivers 
+  echo or other drivers and services 
+  echo requiring service restart or system reboot.
   echo
-  echo "**************************************************************************"
+  echo "=========================================="
   echo
 }
 
@@ -238,9 +280,11 @@ main() {
   update_pacman_mirror_servers
   update_arch_linux_keyring
   remount_boot_partition_as_writable
+  install_script_dependencies
   upgrade_packages
   clean_up
   finalize
 }
 
 main
+
