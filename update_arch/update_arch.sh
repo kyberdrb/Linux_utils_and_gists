@@ -41,9 +41,12 @@ update_repo_of_this_script() {
 }
 
 update_pacman_mirror_servers() {
+  #TODO remove all `cd`s back and forth 
+  # to and from script dir and woking dir
+  # and replace './' for "${SCRIPT_DIR}"
+  # in order to remove duplicate code that changes directories
   local current_working_dir="$(pwd)"
   local script_dir="$(dirname $(readlink -f $0))"
-
   cd "$script_dir"
 
   ./utils/update_pacman_mirror_servers.sh
@@ -151,31 +154,34 @@ update_arch_linux_keyring() {
   echo "==========================================================="
   echo
 
-  # TODO add "~/.config/pikaur.conf" and "/etc/pacman.conf" to this repo into 'configs' dir
-  #  and link these configuration file explicitly into all 'pikaur' command invocations
-  pikaur --sync --refresh --refresh --verbose
+  local current_working_dir="$(pwd)"
+  local script_dir="$(dirname $(readlink -f $0))"
+  cd "$script_dir"
 
-  pikaur --sync --refresh --noconfirm --verbose archlinux-keyring
+  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf --pikaur-config ./config/pikaur.conf
+
+  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf archlinux-keyring
 
   echo 
   echo "'chaotic-mirrorlist' adds separate mirrorlist file in"
   echo " /etc/pacman.d/chaotic-mirrorlist"
   echo
 
-  pikaur --sync --refresh --noconfirm --verbose chaotic-mirrorlist
+  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf chaotic-mirrorlist
 
   echo
   echo "For chaotic-aur repo setup, see page"
   echo " https://lonewolf.pedrohlc.com/chaotic-aur/"
   echo
 
-  pikaur --sync --refresh --noconfirm --verbose chaotic-keyring 
+  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf chaotic-keyring 
+
+  cd "$current_working_dir"
 }
 
 remount_boot_partition_as_writable() {
   local current_working_dir="$(pwd)"
   local script_dir="$(dirname $(readlink -f $0))"
-
   cd "$script_dir"
 
   ./utils/remount_boot_part_as_writable.sh
@@ -195,8 +201,14 @@ install_script_dependencies() {
   echo "--------------------------"
   echo 
 
-  pikaur --sync --refresh --refresh --needed --noconfirm \
+  local current_working_dir="$(pwd)"
+  local script_dir="$(dirname $(readlink -f $0))"
+  cd "$script_dir"
+
+  pikaur --sync --refresh --refresh --needed --noconfirm --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf \
     pikaur powerpill reflector rsync
+
+  cd "$current_working_dir"
 }
 
 upgrade_packages() {
@@ -223,14 +235,18 @@ upgrade_packages() {
   echo " https://bbs.archlinux.org/viewtopic.php?pid=1254940#p1254940"
   echo
 
-  # TODO add "/etc/powerpill/powerpill.json" and "/etc/pacman.conf" to this repo into 'configs' dir
-  #  and link these configuration file explicitly into all 'powerpill' command invocations
+  local current_working_dir="$(pwd)"
+  local script_dir="$(dirname $(readlink -f $0))"
+  cd "$script_dir"
+
   sudo powerpill \
       --sync \
       --refresh --refresh \
       --sysupgrade --sysupgrade \
       --verbose \
       --noconfirm
+      --config ./config/pacman.conf \
+      --powerpill-config ./config/powerpill.json
 
   echo
   echo "==================================================="
@@ -249,9 +265,13 @@ upgrade_packages() {
       --noedit \
       --nodiff \
       --noconfirm \
+      --config ./config/pacman.conf \
+      --pikaur-config ./config/pikaur.conf \
       --overwrite /usr/lib/p11-kit-trust.so \
       --overwrite /usr/bin/fwupdate \
       --overwrite /usr/share/man/man1/fwupdate.1.gz
+
+  cd "$current_working_dir"
 }
 
 clean_up() {

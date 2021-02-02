@@ -1,7 +1,5 @@
 TODO move to a separate repo
 
-TODO add config files for pacman, pikaur and powerpill
-
 # Arch Linux Updater
 
 Update script for fully automatizing the updating Arch Linux
@@ -33,6 +31,8 @@ https://wiki.archlinux.org/index.php/Powerpill#Troubleshooting
 https://bbs.archlinux.org/viewtopic.php?pid=1254940#p1254940
 
 https://xyne.archlinux.ca/projects/powerpill/
+
+[pikaur - configuration file from custom path](https://github.com/actionless/pikaur/blob/5f2d8a7535e429c2387de23d65e6c47b1f463e56/pikaur/config.py#L48)
 
 ---
 
