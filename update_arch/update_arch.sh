@@ -18,16 +18,18 @@ set_up_pacman_configuration() {
   echo "==========================="
   echo
 
-  echo
   echo "==================================="
   echo "Backup current pacman configuration"
   echo "-----------------------------------"
+  echo
 
-  sudo mv /etc/pacman.conf /etc/pacman.conf.bak
+  BACKUP_TIME_AND_DATE=$(date "+%Y_%m_%d-%H_%M_%S")
+  sudo cp --dereference /etc/pacman.conf /etc/pacman.conf-${BACKUP_TIME_AND_DATE}.bak
 
   echo "====================================================="
   echo "Link embedded pacman configuration file to the system"
   echo "-----------------------------------------------------"
+  echo
 
   sudo ln -sf "${SCRIPT_DIR}"/config/pacman.conf /etc/pacman.conf
 }
@@ -317,6 +319,7 @@ finalize() {
 
 main() {
   request_sudo_password
+  set_up_pacman_configuration 
   set_up_pikaur
   update_repo_of_this_script
   update_pacman_mirror_servers
