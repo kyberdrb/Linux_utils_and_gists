@@ -14,7 +14,7 @@ update_pacman_mirror_servers() {
     # The easy way ^_^ that sometimes fails
     # reflector --latest 50 --protocol http,https,rsync --verbose --country Slovakia --country Czechia --country Poland --country Hungary --country Ukraine --country Austria --country Germany | sudo tee /etc/pacman.d/mirrorlist
 
-    # The hard way `_´ that always works :D
+    # The hard way `_´ that always works ºOº &) :D :)
     curl -L "https://www.archlinux.org/mirrors/status/" -o ~/Arch_Linux-Mirrors-Status.html
 
     echo "Finding the table with the fully synced mirrors"

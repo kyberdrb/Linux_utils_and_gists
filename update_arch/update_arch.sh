@@ -1,10 +1,43 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(dirname $(readlink --canonicalize $0))"
+
 request_sudo_password() {
-  sudo ls -d
+  sudo echo
+
+  echo "================================================================================"
+  echo "Script location"
+  echo " $SCRIPT_DIR"
+  echo "================================================================================"
+  echo
+}
+
+set_up_pacman_configuration() {
+  echo "==========================="
+  echo "Set up pacman configuration"
+  echo "==========================="
+  echo
+
+  echo
+  echo "==================================="
+  echo "Backup current pacman configuration"
+  echo "-----------------------------------"
+
+  sudo mv /etc/pacman.conf /etc/pacman.conf.bak
+
+  echo "====================================================="
+  echo "Link embedded pacman configuration file to the system"
+  echo "-----------------------------------------------------"
+
+  sudo ln -sf "${SCRIPT_DIR}"/config/pacman.conf /etc/pacman.conf
 }
 
 set_up_pikaur() {
+  echo "============="
+  echo "Set up pikaur"
+  echo "============="
+  echo
+
   PIKAUR_INSTALLED=$(pacman --query | grep pikaur)
   if [[ -z $PIKAUR_INSTALLED ]]; then 
     rm -rf /tmp/pikaur-git
@@ -14,65 +47,69 @@ set_up_pikaur() {
     cd /tmp/pikaur-git/pikaur-git
     makepkg --ignorearch --clean --syncdeps --noconfirm
     PIKAUR_PACKAGE_NAME=$(ls -- *.tar*)
-    sudo pacman --upgrade "$PIKAUR_PACKAGE_NAME" --noconfirm
+    sudo pacman --upgrade --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf "$PIKAUR_PACKAGE_NAME"
     rm -rf /tmp/pikaur-git
   fi
 
-  echo "'pikaur' package installed:"
+  echo "================================================="
+  echo "'pikaur' package installed"
   echo 'Arch User Repository (AUR) Package Helper present'
-  echo
+  echo "-------------------------------------------------"
+  echo 
 }
 
 update_repo_of_this_script() {
+  echo "========================================"
+  echo "Download latest version of update script"
+  echo "========================================"
+  echo
+
   local git_pull_status=$(git -C "$(dirname $(readlink -f ~/update_arch.sh))" pull)
 
   echo "$git_pull_status" | grep --invert-match "Already up to date."
 
   test $? -eq 0
 
-  local is_local_repo_behind="$?"
-  if [[ is_local_repo_behind -eq 0 ]]; then
+  local is_local_repo_outdated="$?"
+  if [[ is_local_repo_outdated -eq 0 ]]; then
     echo "Repository updated."
     echo "Please, run the script again."
     exit 1
   fi
 
-  echo "Local repo already up to date."
+  echo "======================================="
+  echo "Script is already in the latest version"
+  echo "---------------------------------------"
+  echo
 }
 
 update_pacman_mirror_servers() {
-  #TODO remove all `cd`s back and forth 
-  # to and from script dir and woking dir
-  # and replace './' for "${SCRIPT_DIR}"
-  # in order to remove duplicate code that changes directories
-  local current_working_dir="$(pwd)"
-  local script_dir="$(dirname $(readlink -f $0))"
-  cd "$script_dir"
+  echo "====================================="
+  echo "Download fresh list of mirror servers"
+  echo "====================================="
+  echo
 
-  ./utils/update_pacman_mirror_servers.sh
-
-  cd "$current_working_dir"
+  "${SCRIPT_DIR}"/utils/update_pacman_mirror_servers.sh
 }
 
 update_arch_linux_keyring() {
   echo
-  echo "Update Arch Linux keyring to avoid PGP signature errors"
+  echo "=============================="
+  echo "Update Arch Linux keyring"
+  echo " to avoid PGP signature errors"
+  echo "=============================="
   echo
 
   echo
-  echo "================"
-  echo "Cleanup GPG keys"
-  echo "================"
-  echo
-  echo Source:
-  echo   https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082
-  echo
+  echo "======================"
+  echo "Cleanup GPG keys first"
+  echo " see https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082"
+  echo "----------------------"
 
   sudo rm -R /etc/pacman.d/gnupg/
   sudo rm -R /root/.gnupg/
   rm -rf ~/.gnupg/
 
-  echo
   echo "========================="
   echo "Initialize pacman keyring"
   echo "========================="
@@ -128,10 +165,10 @@ update_arch_linux_keyring() {
   sudo pacman-key --lsign-key 95C357D2AF5DA89D
  
   echo
-  echo "====================================="
+  echo "======================================"
   echo "Add GPG key for 'chaotic' repository:"
-  echo "Pedro Henrique Lara Campos - pedrohlc"
-  echo "====================================="
+  echo " Pedro Henrique Lara Campos - pedrohlc"
+  echo "======================================"
   echo
 
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
@@ -154,39 +191,39 @@ update_arch_linux_keyring() {
   echo "==========================================================="
   echo
 
-  local current_working_dir="$(pwd)"
-  local script_dir="$(dirname $(readlink -f $0))"
-  cd "$script_dir"
+  pikaur --sync --refresh --refresh --verbose --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf
 
-  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf --pikaur-config ./config/pikaur.conf
-
-  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf archlinux-keyring
+  pikaur --sync --refresh --verbose --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf archlinux-keyring
 
   echo 
+  echo "-----------------------------------------------------"
   echo "'chaotic-mirrorlist' adds separate mirrorlist file in"
   echo " /etc/pacman.d/chaotic-mirrorlist"
+  echo "-----------------------------------------------------"
   echo
 
-  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf chaotic-mirrorlist
+  pikaur --sync --refresh --verbose --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf chaotic-mirrorlist
 
   echo
+  echo "-------------------------------------------"
   echo "For chaotic-aur repo setup, see page"
   echo " https://lonewolf.pedrohlc.com/chaotic-aur/"
+  echo "-------------------------------------------"
   echo
 
-  pikaur --sync --refresh --refresh --verbose --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf chaotic-keyring 
-
-  cd "$current_working_dir"
+  pikaur --sync --refresh --verbose --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf chaotic-keyring 
 }
 
 remount_boot_partition_as_writable() {
-  local current_working_dir="$(pwd)"
-  local script_dir="$(dirname $(readlink -f $0))"
-  cd "$script_dir"
+  echo
+  echo "=============================="
+  echo "Remounting boot partition as writable"
+  echo " in order to make he upgrade of kernel"
+  echo " and other kernel dependend modules possible"
+  echo "=============================="
+  echo
 
-  ./utils/remount_boot_part_as_writable.sh
-
-  cd "$current_working_dir"
+  "${SCRIPT_DIR}"/utils/remount_boot_part_as_writable.sh
 }
 
 install_script_dependencies() {
@@ -194,59 +231,42 @@ install_script_dependencies() {
   echo "=============================="
   echo "Installing script dependencies"
   echo "=============================="
-
   echo
-  echo "--------------------------"
-  echo "Install dependent packages"
-  echo "--------------------------"
-  echo 
 
-  local current_working_dir="$(pwd)"
-  local script_dir="$(dirname $(readlink -f $0))"
-  cd "$script_dir"
-
-  pikaur --sync --refresh --refresh --needed --noconfirm --config ./config/pacman.conf --pikaur-config ./config/pikaur.conf \
-    pikaur powerpill reflector rsync
-
-  cd "$current_working_dir"
+  pikaur --sync --refresh --needed --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf pikaur powerpill reflector rsync
 }
 
 upgrade_packages() {
-  echo
   echo "==============================="
   echo "Updating and upgrading packages"
   echo "==============================="
   echo 
 
-  echo
-  echo "------------------------"
+  echo "========================"
   echo "Clear 'pacman' databases"
   echo "------------------------"
-  echo 
+  echo
 
   sudo rm -rf /var/lib/pacman/sync/*
 
-  echo
-  echo "Pacman configuration file '/etc/pacman.conf'"
+  echo "=========================================================="
+  echo "Pacman configuration file"
   echo "had been patched for 'powerpill' to resolve error messages"
   echo "according to"
   echo " https://wiki.archlinux.org/index.php/Powerpill#Troubleshooting"
   echo "and"
   echo " https://bbs.archlinux.org/viewtopic.php?pid=1254940#p1254940"
-  echo
-
-  local current_working_dir="$(pwd)"
-  local script_dir="$(dirname $(readlink -f $0))"
-  cd "$script_dir"
+  echo "---------------------------------------------------------------"
 
   sudo powerpill \
       --sync \
       --refresh --refresh \
       --sysupgrade --sysupgrade \
+      --needed \
       --verbose \
-      --noconfirm
-      --config ./config/pacman.conf \
-      --powerpill-config ./config/powerpill.json
+      --noconfirm \
+      --config "${SCRIPT_DIR}"/config/pacman.conf \
+      --powerpill-config "${SCRIPT_DIR}"/config/powerpill.json
 
   echo
   echo "==================================================="
@@ -265,27 +285,25 @@ upgrade_packages() {
       --noedit \
       --nodiff \
       --noconfirm \
-      --config ./config/pacman.conf \
-      --pikaur-config ./config/pikaur.conf \
+      --config "${SCRIPT_DIR}"/config/pacman.conf \
+      --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf \
       --overwrite /usr/lib/p11-kit-trust.so \
       --overwrite /usr/bin/fwupdate \
       --overwrite /usr/share/man/man1/fwupdate.1.gz
-
-  cd "$current_working_dir"
 }
 
 clean_up() {
   echo
+  echo "=================="
   echo "Removing leftovers"
-  echo
+  echo "=================="
 
   rm -rf ~/.libvirt
 }
 
 finalize() {
-  echo "Finalizing upgrade"
+  clear -x
 
-  echo
   echo "=========================================="
   echo
   echo Please, reboot to apply updates 
