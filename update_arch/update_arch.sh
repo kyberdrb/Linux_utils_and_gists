@@ -107,6 +107,7 @@ update_arch_linux_keyring() {
   echo "Cleanup GPG keys first"
   echo " see https://bbs.archlinux.org/viewtopic.php?pid=1837082#p1837082"
   echo "----------------------"
+  echo
 
   sudo rm -R /etc/pacman.d/gnupg/
   sudo rm -R /root/.gnupg/
@@ -114,7 +115,7 @@ update_arch_linux_keyring() {
 
   echo "========================="
   echo "Initialize pacman keyring"
-  echo "========================="
+  echo "-------------------------"
   echo
 
   sudo pacman-key --init
@@ -124,16 +125,17 @@ update_arch_linux_keyring() {
   echo
   echo "====================================================="
   echo "Add GPG keys for custom repositories and AUR packages"
-  echo "====================================================="
+  echo "-----------------------------------------------------"
   echo
 
   sudo pacman-key --populate archlinux
   sudo gpg --refresh-keys
 
   echo
-  echo "+----------------------------------+"
-  echo "| Add GPG key for seblu repository |"
-  echo "+----------------------------------+"
+  echo "================================"
+  echo "Add GPG key for seblu repository"
+  echo '(unofficial repo)'
+  echo "--------------------------------"
   echo
 
   sudo pacman-key --recv-keys 76F3EB6DA1C5F938AD642DC438DCEEBE387A1EEE
@@ -142,7 +144,8 @@ update_arch_linux_keyring() {
   echo
   echo "====================================="
   echo "Add GPG key for 'liquorix' repository"
-  echo "====================================="
+  echo '(unofficial repo)'
+  echo "-------------------------------------"
   echo
 
   sudo pacman-key --recv-keys 9AE4078033F8024D
@@ -151,7 +154,8 @@ update_arch_linux_keyring() {
   echo
   echo "========================================="
   echo "Add GPG key for 'ck' repository - graysky"
-  echo "========================================="
+  echo '(unofficial repo)'
+  echo "-----------------------------------------"
   echo
    
   sudo pacman-key --recv-keys 5EE46C4C --keyserver hkp://pool.sks-keyservers.net
@@ -160,7 +164,8 @@ update_arch_linux_keyring() {
   echo
   echo "========================================"
   echo "Add GPG key for 'post-factum' repository"
-  echo "========================================"
+  echo '(unofficial repo)'
+  echo "----------------------------------------"
   echo
 
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 95C357D2AF5DA89D
@@ -170,18 +175,20 @@ update_arch_linux_keyring() {
   echo "======================================"
   echo "Add GPG key for 'chaotic' repository:"
   echo " Pedro Henrique Lara Campos - pedrohlc"
-  echo "======================================"
+  echo '(unofficial repo)'
+  echo "--------------------------------------"
   echo
 
   sudo pacman-key --keyserver hkp://pool.sks-keyservers.net --recv-keys 3056513887B78AEB
   sudo pacman-key --lsign-key 3056513887B78AEB
 
   echo
-  echo "======================================================================"
+  echo "================================================="
   echo "Add GPG key for Pedram Pourang - tsujan"
   echo "Required when building 'compton-conf' AUR package"
   echo '  see (https://aur.archlinux.org/packages/compton-conf/#pinned-742136)'
-  echo "======================================================================"
+  echo '(AUR repo)'
+  echo "-------------------------------------------------"
   echo
 
   gpg --recv-keys BE793007AD22DF7E
@@ -190,7 +197,7 @@ update_arch_linux_keyring() {
   echo
   echo "==========================================================="
   echo "Uprade keyrings and additional mirrorlists for repositories"
-  echo "==========================================================="
+  echo "-----------------------------------------------------------"
   echo
 
   pikaur --sync --refresh --refresh --verbose --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf
@@ -198,7 +205,7 @@ update_arch_linux_keyring() {
   pikaur --sync --refresh --verbose --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf archlinux-keyring
 
   echo 
-  echo "-----------------------------------------------------"
+  echo "====================================================="
   echo "'chaotic-mirrorlist' adds separate mirrorlist file in"
   echo " /etc/pacman.d/chaotic-mirrorlist"
   echo "-----------------------------------------------------"
@@ -207,7 +214,7 @@ update_arch_linux_keyring() {
   pikaur --sync --refresh --verbose --noconfirm --config "${SCRIPT_DIR}"/config/pacman.conf --pikaur-config "${SCRIPT_DIR}"/config/pikaur.conf chaotic-mirrorlist
 
   echo
-  echo "-------------------------------------------"
+  echo "===================================="
   echo "For chaotic-aur repo setup, see page"
   echo " https://lonewolf.pedrohlc.com/chaotic-aur/"
   echo "-------------------------------------------"
@@ -218,11 +225,11 @@ update_arch_linux_keyring() {
 
 remount_boot_partition_as_writable() {
   echo
-  echo "=============================="
+  echo "============================================"
   echo "Remounting boot partition as writable"
   echo " in order to make he upgrade of kernel"
   echo " and other kernel dependend modules possible"
-  echo "=============================="
+  echo "============================================"
   echo
 
   "${SCRIPT_DIR}"/utils/remount_boot_part_as_writable.sh
@@ -251,6 +258,14 @@ upgrade_packages() {
 
   sudo rm -rf /var/lib/pacman/sync/*
 
+  echo "==================================="
+  echo "Show packages that will be upgraded"
+  echo "-----------------------------------"
+  echo
+
+  echo -ne 'n\n' | pikaur --sync --refresh --refresh --sysupgrade --sysupgrade
+
+  echo
   echo "=========================================================="
   echo "Pacman configuration file"
   echo "had been patched for 'powerpill' to resolve error messages"
@@ -271,12 +286,11 @@ upgrade_packages() {
       --powerpill-config "${SCRIPT_DIR}"/config/powerpill.json
 
   echo
-  echo "==================================================="
+  echo "===================================================="
   echo "Updating and upgrading packages AUR packages"
-  echo "and official packages that haven't been updated yet"
-  echo "to the latest version"
-  echo "or haven't been updated at all"
-  echo "==================================================="
+  echo "and official packages that haven't yet been updated"
+  echo "to the latest version or haven't been updated at all"
+  echo "----------------------------------------------------"
   echo 
 
   pikaur \
@@ -301,6 +315,7 @@ clean_up() {
   echo "=================="
 
   rm -rf ~/.libvirt
+  sudo powerpill --powerpill-clean
 }
 
 finalize() {

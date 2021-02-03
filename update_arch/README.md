@@ -1,8 +1,6 @@
-TODO finalize formatting of 'utils' scripts
-
-TODO move comments from pacman.conf into the script - GPG configuration part
-
 TODO move to a separate repo
+
+TODO update Arch Linux installation guide - pacman setup, updating, link to pacman.conf to the new repo
 
 # Arch Linux Updater
 
