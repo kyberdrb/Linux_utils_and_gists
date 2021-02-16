@@ -1,6 +1,5 @@
 --enable-oop-rasterization
---disable-gpu-driver-bug-workarounds
 --force-gpu-rasterization
+--disable-gpu-driver-bug-workarounds
 --enable-native-gpu-memory-buffers
 --enable-zero-copy
-
