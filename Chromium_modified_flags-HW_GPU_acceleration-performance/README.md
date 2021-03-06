@@ -1,8 +1,16 @@
 # Chromium - faster and more efficient
 
-## `chromium-flags.conf`
+## Usage
 
-What to do with the `chromium-flags.conf.*` files? Choose the one corresponding to the manufacturer of your GPU and rename it to `*.conf`, i.e. remove the suffix, and copy to `$HOME/.config/` to [preserve changes](https://wiki.archlinux.org/index.php/Chromium#Making_flags_persistent)
+`chromium-flags.conf` file is used to [preserve changes](https://wiki.archlinux.org/index.php/Chromium#Making_flags_persistent) without typing it directly for each run of the browser. I use the configuration file as a link to this repository, according to the GPU:
+
+### Intel GPU
+
+    ln -sf REPO_LOCATION/Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.intel_gpu ~/.config/chromium-flags.conf
+    
+### AMG GPU
+
+    ln -sf REPO_LOCATION    /Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.amd_gpu ~/.config/chromium-flags.conf
 
 Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) and AMD Radeon 8400/AMD Radeon R3 of AMD Athlon 5350 APU (Kabini)
 
