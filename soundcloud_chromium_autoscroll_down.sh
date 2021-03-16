@@ -6,7 +6,7 @@ selectChromiumWindow() {
     # therefore 'tail' not 'head' for 'xdotool search'
     # at https://github.com/jordansissel/xdotool/blob/master/examples/desktopconsole.sh
 
-    chro_win_id=$1
+    local chro_win_id=$1
     xdotool windowactivate --sync $chro_win_id
 }
 
