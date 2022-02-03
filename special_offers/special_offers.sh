@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# TODO rework into C++
+#  - download special offers from links in txt file
+#  - sort the list
+#  - merge duplicate offers into one
+#  - show the list in a table?
+
 cat /dev/null > "/tmp/akcie.txt"
 
 # Load special offers from zlacnene.sk
