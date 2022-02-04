@@ -218,9 +218,11 @@ android_phone_adb_id="$(adb devices | tail -n +2 | head -n 1 | tr '[:blank:]' ' 
 
 if [ -n "${android_phone_adb_id}" ]
 then
-  adb push /tmp/akcie.txt /storage/extSdCard/akcie.txt
-  adb push /tmp/akcie.txt /sdcard/akcie.txt
+  adb push /tmp/akcie.txt /storage/extSdCard/akcie.txt | grep --invert-match "adb: error: failed to"
+  adb push /tmp/akcie.txt /sdcard/akcie.txt | grep --invert-match "adb: error: failed to"
 fi
+
+echo "less "/tmp/akcie.txt""
 
 less "/tmp/akcie.txt"
 
