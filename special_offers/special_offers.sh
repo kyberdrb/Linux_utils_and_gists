@@ -222,6 +222,11 @@ then
   adb push /tmp/akcie.txt /sdcard/akcie.txt | grep --invert-match "adb: error: failed to"
 fi
 
+# Push to all 'mtp' directories, i.e. mounted Android phones 
+cp "/tmp/akcie.txt" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner gemeinsamer Speicher/akcie.txt" 2>/dev/null
+
+echo "Open current special offers with e.g."
+echo
 echo "less "/tmp/akcie.txt""
 
 less "/tmp/akcie.txt"
@@ -245,3 +250,6 @@ less "/tmp/akcie.txt"
 #- https://duckduckgo.com/?q=curl+cloudflare&ia=web
 #- PHP CURL function which bypasses the Cloudflare: https://gist.github.com/yasinkuyu/bb3e1abe15ebdc099201724f4cbd2100
 #- https://stackoverflow.com/questions/18500088/curl-load-a-site-with-cloudflare-protection/27239049#27239049
+#- https://duckduckgo.com/?q=copy+file+terminal+mtp+arch+terminal&ia=web
+#- https://itectec.com/unixlinux/linux-accessing-mtp-mounted-device-in-terminal/
+
