@@ -84,7 +84,7 @@ page_index=0
 while true
 do
   products_in_special_offer="$(\
-    curl --silent "https://kompaszliav.sk/zelenina?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=price&storeFilterAmp-monitoringProducts-order=asc&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,kaufland,kraj,lidl,metro,potraviny-koruna,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
+    curl --silent "https://kompaszliav.sk/n/zelenina?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=null&storeFilterAmp-monitoringProducts-order=null&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
       -H 'Host: kompaszliav.sk:443' \
       -H 'Accept: */*' \
       -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
@@ -146,7 +146,7 @@ page_index=0
 while true
 do
   products_in_special_offer="$(\
-    curl --silent "https://kompaszliav.sk/ovocie?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=price&storeFilterAmp-monitoringProducts-order=asc&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,kaufland,kraj,lidl,metro,potraviny-koruna,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
+    curl --silent "https://kompaszliav.sk/n/ovocie?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=null&storeFilterAmp-monitoringProducts-order=null&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,potraviny-koruna,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
       -H 'Host: kompaszliav.sk:443' \
       -H 'Accept: */*' \
       -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
@@ -222,12 +222,28 @@ then
   adb push /tmp/akcie.txt /sdcard/akcie.txt | grep --invert-match "adb: error: failed to"
 fi
 
-# Push to all 'mtp' directories, i.e. mounted Android phones 
+# Mount all available Android phones and MTP devices
+gio mount mtp://SONY_G3121_RQ300688BU/
+#gio mount -li | grep mtp | cut --delimiter='=' --fields=2
+
+# Push to all available internal and external storages of all mounted Android phones and MTP devices
+#find "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU"/ -maxdepth 1 | tail -n -1
 cp "/tmp/akcie.txt" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner gemeinsamer Speicher/akcie.txt" 2>/dev/null
 
+# unmount the mtp filesystem as soon as it's idle, instead of a fixed time
+#while true
+#do
+#  if the output of the command "gio mount -u mtp://SONY_G3121_RQ300688BU/" is not "The connection is closed"
+#  then
+#     break
+#  fi
+#done
+
+sleep 1
+gio mount -u mtp://SONY_G3121_RQ300688BU/
+
 echo "Open current special offers with e.g."
-echo
-echo "less "/tmp/akcie.txt""
+echo "  less "/tmp/akcie.txt""
 
 less "/tmp/akcie.txt"
 
