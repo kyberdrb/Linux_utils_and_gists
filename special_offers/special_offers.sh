@@ -268,4 +268,4 @@ less "/tmp/akcie.txt"
 #- https://stackoverflow.com/questions/18500088/curl-load-a-site-with-cloudflare-protection/27239049#27239049
 #- https://duckduckgo.com/?q=copy+file+terminal+mtp+arch+terminal&ia=web
 #- https://itectec.com/unixlinux/linux-accessing-mtp-mounted-device-in-terminal/
-
+#- https://stackoverflow.com/questions/34504311/how-to-tail-all-lines-except-first-row#34504344
