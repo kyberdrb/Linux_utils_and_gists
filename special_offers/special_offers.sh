@@ -227,7 +227,7 @@ gio mount mtp://SONY_G3121_RQ300688BU/
 #gio mount -li | grep mtp | cut --delimiter='=' --fields=2
 
 # Push to all available internal and external storages of all mounted Android phones and MTP devices
-#find "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU"/ -maxdepth 1 | tail -n -1
+#find "/run/user/1000/gvfs/$(echo "mtp://SONY_G3121_RQ300688BU/" | sed 's#mtp://#mtp:host=#g')" -maxdepth 1 | tail -n +2 | xargs -I {} gio copy "/tmp/akcie.txt" "{}/"
 cp "/tmp/akcie.txt" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner gemeinsamer Speicher/akcie.txt" 2>/dev/null
 
 # unmount the mtp filesystem as soon as it's idle, instead of a fixed time
