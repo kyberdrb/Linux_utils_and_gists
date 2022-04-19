@@ -2,15 +2,31 @@
 
 ## Usage
 
-`chromium-flags.conf` file is used to [preserve changes](https://wiki.archlinux.org/index.php/Chromium#Making_flags_persistent) without typing it directly for each run of the browser. I use the configuration file as a link to this repository, according to the GPU:
+`chromium-flags.conf` file is used to [preserve changes](https://wiki.archlinux.org/index.php/Chromium#Making_flags_persistent) without typing it directly to the terminal as options when launching `chromium` each time I want to browse. The type of configuration file depends on your GPU.
+
+First, back up current chromium configuration, if any:
+
+    cp ~/.config/chromium-flags.conf ~/.config/chromium-flags.conf.bak
 
 ### Intel GPU
 
+Link or Copy new configuration file
+
     ln -sf REPO_LOCATION/Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.intel_gpu ~/.config/chromium-flags.conf
+    
+or
+
+    cp REPO_LOCATION/Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.intel_gpu ~/.config/chromium-flags.conf
     
 ### AMG GPU
 
-    ln -sf REPO_LOCATION    /Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.amd_gpu ~/.config/chromium-flags.conf
+Link or Copy new configuration file
+
+    ln -sf REPO_LOCATION/Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.amd_gpu ~/.config/chromium-flags.conf
+    
+or
+
+    cp REPO_LOCATION/Chromium_modified_flags-HW_GPU_acceleration-performance/chromium-flags.conf.amd_gpu ~/.config/chromium-flags.conf
 
 Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) and AMD Radeon 8400/AMD Radeon R3 of AMD Athlon 5350 APU (Kabini)
 
