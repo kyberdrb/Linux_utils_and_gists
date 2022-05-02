@@ -12,12 +12,17 @@ cat /dev/null > "/tmp/akcie.txt"
 
 number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
 
+echo '[zelenina - zlacnene.sk]' >> "/tmp/akcie.txt"
+
 for page_number in $(seq 1 "${number_of_pages}")
 do
   curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "/tmp/akcie.txt"
 done
 
 number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
+
+echo '---' >> "/tmp/akcie.txt"
+echo '[ovocie - zlacnene.sk]' >> "/tmp/akcie.txt"
 
 for page_number in $(seq 1 "${number_of_pages}")
 do
@@ -80,11 +85,14 @@ done
 
 printf "%s\n" "---" >> "/tmp/akcie.txt"
 
+echo '[zelenina - kompaszliav.sk]' >> "/tmp/akcie.txt"
+echo '---' >> "/tmp/akcie.txt"
+
 page_index=0
 while true
 do
   products_in_special_offer="$(\
-    curl --silent "https://kompaszliav.sk/n/zelenina?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=null&storeFilterAmp-monitoringProducts-order=null&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
+    curl --silent "https://kompaszliav.sk/n/zelenina?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=price&storeFilterAmp-monitoringProducts-order=asc&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
       -H 'Host: kompaszliav.sk:443' \
       -H 'Accept: */*' \
       -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
@@ -141,6 +149,11 @@ do
   printf "%s\n" "${products_in_special_offer}" >> "/tmp/akcie.txt"
   page_index=$(( page_index + 1 ))
 done
+
+{
+  printf "%s\n" "---"
+  echo '[ovocie - kompaszliav.sk]'
+} >> "/tmp/akcie.txt"
 
 page_index=0
 while true

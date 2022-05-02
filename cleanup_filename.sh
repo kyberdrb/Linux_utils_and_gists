@@ -2,7 +2,7 @@
 
 ORIGINAL_FILE_NAME="$1"
 
-CLEANSED_FILE_NAME="$(printf "%s" "${ORIGINAL_FILE_NAME}" | sed 's/:/_-_/g' | sed 's/@/-/g' | tr -d '<>"/\|?*(),""“”+*;&£$€¥\!' | tr -d "'" | sed 's/ /_/g' | sed 's/__*/_/g' | sed 's/--*/-/g' | tr -d '\r\n')"
+CLEANSED_FILE_NAME="$(printf "%s" "${ORIGINAL_FILE_NAME}" | sed 's/ /_/g' | tr -d '<>"/\|?*(),"' | sed 's/“”\+\*;£$€¥\!//g' | sed 's/&/and/g' | tr -d "'" | sed 's/:/_-_/g' | sed 's/@/-/g' | sed 's/__*/_/g' | sed 's/--*/-/g' | tr -d '\r\n')"
 
 printf "%s" "${CLEANSED_FILE_NAME}" | xclip -selection clipboard
 printf "%s\n" "${CLEANSED_FILE_NAME}"
