@@ -256,9 +256,12 @@ sleep 1
 gio mount -u mtp://SONY_G3121_RQ300688BU/
 
 echo "Open current special offers with e.g."
-echo "  less "/tmp/akcie.txt""
+echo "  less --ignore-case "/tmp/akcie.txt""
 
 less "/tmp/akcie.txt"
+
+echo "Ceny pre 'METRO' na portáli 'kompaszliav.sk' sú uvedené bez DPH."
+echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 
 # README.md
 #Sources
