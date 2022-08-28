@@ -1,37 +1,44 @@
 #!/bin/sh
 
-date
-
 # TODO rework into C++
 #  - download special offers from links in txt file
 #  - sort the list
 #  - merge duplicate offers into one
 #  - show the list in a table?
 
-#if [ is_connected_to_network ]
-#then
-#    printf "%s\n" "This app needs a connection to the internet to download the latest special offers."
-#    printf "%s\n" "Please, connect the device to the internet via e. g. WIFI or Ethernet and try again"
-#    exit
-#fi
+# Test internet connection - prevention against content erasure of previously populated special offer file
+curl ifconfig.co > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+    printf "%s\n" "This app needs a connection to the internet to download the latest special offers."
+    printf "%s\n" "Please, connect the device to the internet wirelessly, e.g. via Wi-Fi, or via cable, e.g. Ethernet, and run the app again."
+    exit 1
+fi
 
-cat /dev/null > "/tmp/akcie.txt"
+SPECIAL_OFFERS_FILE_PATH="/tmp/akcie.txt"
+
+cat /dev/null > "${SPECIAL_OFFERS_FILE_PATH}"
+
+{
+  date
+  echo
+} > "${SPECIAL_OFFERS_FILE_PATH}"
 
 # Load special offers from zlacnene.sk
 
 number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
 
-echo '[zelenina - zlacnene.sk]' >> "/tmp/akcie.txt"
+echo '[zelenina - zlacnene.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
 
 for page_number in $(seq 1 "${number_of_pages}")
 do
-  curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "/tmp/akcie.txt"
+  curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "${SPECIAL_OFFERS_FILE_PATH}"
 done
 
-printf "%s\n" "---" >> "/tmp/akcie.txt"
+printf "%s\n" "---" >> "${SPECIAL_OFFERS_FILE_PATH}"
 
-echo '[zelenina - kompaszliav.sk]' >> "/tmp/akcie.txt"
-echo '---' >> "/tmp/akcie.txt"
+echo '[zelenina - kompaszliav.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
+echo '---' >> "${SPECIAL_OFFERS_FILE_PATH}"
 
 page_index=0
 while true
@@ -91,18 +98,18 @@ do
     break
   fi
 
-  printf "%s\n" "${products_in_special_offer}" >> "/tmp/akcie.txt"
+  printf "%s\n" "${products_in_special_offer}" >> "${SPECIAL_OFFERS_FILE_PATH}"
   page_index=$(( page_index + 1 ))
 done
 
 number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
 
-echo '---' >> "/tmp/akcie.txt"
-echo '[ovocie - zlacnene.sk]' >> "/tmp/akcie.txt"
+echo '---' >> "${SPECIAL_OFFERS_FILE_PATH}"
+echo '[ovocie - zlacnene.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
 
 for page_number in $(seq 1 "${number_of_pages}")
 do
-  curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "/tmp/akcie.txt"
+  curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "${SPECIAL_OFFERS_FILE_PATH}"
 done
 
 # Load special offers from kompaszliav.sk
@@ -162,7 +169,7 @@ done
 {
   printf "%s\n" "---"
   echo '[ovocie - kompaszliav.sk]'
-} >> "/tmp/akcie.txt"
+} >> "${SPECIAL_OFFERS_FILE_PATH}"
 
 page_index=0
 while true
@@ -222,7 +229,7 @@ do
     break
   fi
 
-  printf "%s\n" "${products_in_special_offer}" >> "/tmp/akcie.txt"
+  printf "%s\n" "${products_in_special_offer}" >> "${SPECIAL_OFFERS_FILE_PATH}"
   page_index=$(( page_index + 1 ))
 done
 
@@ -235,6 +242,8 @@ done
 #perl -C -e 'print chr 0x00e1'
 # or
 #echo -ne '\x00\xe1' | iconv -f utf-16be
+
+# Send the special offers file to currently connected Android phone
 
 android_phone_adb_id="$(adb devices | tail -n +2 | head -n 1 | tr '[:blank:]' ' ' | cut --delimiter=' ' --fields=1)"
 
@@ -249,8 +258,8 @@ gio mount mtp://SONY_G3121_RQ300688BU/
 #gio mount -li | grep mtp | cut --delimiter='=' --fields=2
 
 # Push to all available internal and external storages of all mounted Android phones and MTP devices
-#find "/run/user/1000/gvfs/$(echo "mtp://SONY_G3121_RQ300688BU/" | sed 's#mtp://#mtp:host=#g')" -maxdepth 1 | tail -n +2 | xargs -I {} gio copy "/tmp/akcie.txt" "{}/"
-cp "/tmp/akcie.txt" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner gemeinsamer Speicher/akcie.txt" 2>/dev/null
+#find "/run/user/1000/gvfs/$(echo "mtp://SONY_G3121_RQ300688BU/" | sed 's#mtp://#mtp:host=#g')" -maxdepth 1 | tail -n +2 | xargs -I {} gio copy "${SPECIAL_OFFERS_FILE_PATH}" "{}/"
+cp "${SPECIAL_OFFERS_FILE_PATH}" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner gemeinsamer Speicher/akcie.txt" 2>/dev/null
 
 # unmount the mtp filesystem as soon as it's idle, instead of a fixed time
 #while true
@@ -261,15 +270,17 @@ cp "/tmp/akcie.txt" "/run/user/1000/gvfs/mtp:host=SONY_G3121_RQ300688BU/Interner
 #  fi
 #done
 
-printf "%s" "less --ignore-case "/tmp/akcie.txt"" | xclip -selection clipboard -in
+printf "%s" "less --ignore-case "${SPECIAL_OFFERS_FILE_PATH}"" | xclip -selection clipboard -in
 
 sleep 1
 gio mount -u mtp://SONY_G3121_RQ300688BU/
 
 echo "Open current special offers with e.g."
-echo "  less --ignore-case "/tmp/akcie.txt""
+echo "  less --ignore-case "${SPECIAL_OFFERS_FILE_PATH}""
 
-less --ignore-case "/tmp/akcie.txt"
+printf "%s" "less --ignore-case "${SPECIAL_OFFERS_FILE_PATH}"" | xclip -in -selection clipboard
+
+less --ignore-case "${SPECIAL_OFFERS_FILE_PATH}"
 
 echo "Ceny pre 'METRO' na portáli 'kompaszliav.sk' sú uvedené bez DPH."
 echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
@@ -296,3 +307,4 @@ echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 #- https://duckduckgo.com/?q=copy+file+terminal+mtp+arch+terminal&ia=web
 #- https://itectec.com/unixlinux/linux-accessing-mtp-mounted-device-in-terminal/
 #- https://stackoverflow.com/questions/34504311/how-to-tail-all-lines-except-first-row#34504344
+
