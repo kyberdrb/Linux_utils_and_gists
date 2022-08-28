@@ -307,4 +307,7 @@ echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 #- https://duckduckgo.com/?q=copy+file+terminal+mtp+arch+terminal&ia=web
 #- https://itectec.com/unixlinux/linux-accessing-mtp-mounted-device-in-terminal/
 #- https://stackoverflow.com/questions/34504311/how-to-tail-all-lines-except-first-row#34504344
+#- https://duckduckgo.com/?q=bash+check+if+connected+to+network&ia=web
+#- https://stackoverflow.com/questions/929368/how-to-test-an-internet-connection-with-bash
+#- https://stackoverflow.com/questions/929368/how-to-test-an-internet-connection-with-bash/47375551#47375551
 
