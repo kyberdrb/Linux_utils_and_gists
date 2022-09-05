@@ -28,22 +28,57 @@ cat /dev/null > "${SPECIAL_OFFERS_FILE_PATH}"
 
 # Load special offers from zlacnene.sk
 
-#number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
+NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL="https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-"
+#NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL="https://www.zlacnene.sk/akciovy-tovar/sk-potraviny/najlacnejsie/strana-"
 
-# TODO TEST
-number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "<\/a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
+number_of_pages="$(curl --silent "${NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL}1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "<\/a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
 
-# TODO TEST - funguje iba ked je pagination s tromi bodkami
-#number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/potraviny/najlacnejsie/strana-1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep page-link | tail --lines=2 | head --lines=1 | sed 's/"page-link">//' | sed 's/<\/a>//')"
-
-echo '[zelenina - zlacnene.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
+{
+  echo '[zelenina - zlacnene.sk]'
+  printf "%s\n" "---"
+} >> "${SPECIAL_OFFERS_FILE_PATH}"
 
 for page_number in $(seq 1 "${number_of_pages}")
 do
-  curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "${SPECIAL_OFFERS_FILE_PATH}"
-done
+  # gather all links for products in special offer from current page
+  URLs_for_all_products_from_current_page="$(curl --silent "${NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL}${page_number}/" | tidy -quiet 2>/dev/null | grep "^\"/akcia/.*class=$" | uniq | sed 's/"*\stitle=.*$//' | sed 's/"*\sclass=.*$//' | sed 's#^"#https://www.zlacnene.sk#g')"
 
-printf "%s\n" "---" >> "${SPECIAL_OFFERS_FILE_PATH}"
+  for URL_for_product_in_special_offer in ${URLs_for_all_products_from_current_page}
+  do
+    # FOR DEBUGGING PURPOSES
+    #echo ${URL_for_product_in_special_offer}
+
+    curl --silent "${URL_for_product_in_special_offer}" \
+      | tidy -quiet 2>/dev/null \
+      | sed 's/<h1 class="nadpis-zbozi" itemprop="name">/nameOfProductInSpecialOffer=/g' \
+      | sed 's/<p class="mb-1" itemprop="price" content="/priceOfProductInSpecialOffer=/g' \
+      | sed 's/<p class="fs-20 fw-bold color-red mb-0 d-inline-block">/priceOfProductInSpecialOffer=/g' \
+      | sed '/itemprop="url">/s/^"/storeOfProductInSpecialOffer=/g' \
+      | sed '/itemprop="url">/s/" itemprop="url".*//g' \
+      | sed '/storeOfProductInSpecialOffer=<img src=/d' \
+      | sed 's/<h2 class="col-12 fs-18 fs-m-15 fw-bold mb-0">/storeOfProductInSpecialOffer=/g' \
+      | sed -E 's/^content="[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}">/specialOfferValidUntil=/g' \
+      | sed '/^"\/letak\/.*class=/s/^"/catalogue=https:\/\/www\.zlacnene\.sk/g' \
+      | sed '/catalogue=.*class="letak-img-proklik"/d' \
+      | grep -e 'nameOfProductInSpecialOffer' -e 'priceOfProductInSpecialOffer' -e 'storeOfProductInSpecialOffer' -e 'specialOfferValidUntil' -e 'catalogue' \
+      | sed '/nameOfProductInSpecialOffer/s/<\/h1>//g' \
+      | sed '/storeOfProductInSpecialOffer/s/<\/h2>//g' \
+      | sed '/storeOfProductInSpecialOffer/s/retezec-ico" title="//g' \
+      | sed '/priceOfProductInSpecialOffer/s/">Akčná cena://g' \
+      | sed '/priceOfProductInSpecialOffer/s/<\/p>//g' \
+      | sed '/specialOfferValidUntil/s/Platí do: <strong>//g' \
+      | sed '/specialOfferValidUntil/s/<\/strong>.*//g' \
+      | sed '/catalogue/s/" class=$//g' \
+      | uniq \
+      | sed 's/nameOfProductInSpecialOffer/name/g' \
+      | sed 's/priceOfProductInSpecialOffer/price/g' \
+      | sed 's/storeOfProductInSpecialOffer/store/g' \
+      | sed 's/specialOfferValidUntil/until/g' \
+      | less >> "${SPECIAL_OFFERS_FILE_PATH}"
+
+    printf "%s\n" "---" >> "${SPECIAL_OFFERS_FILE_PATH}"
+  done
+done
 
 echo '[zelenina - kompaszliav.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
 echo '---' >> "${SPECIAL_OFFERS_FILE_PATH}"
@@ -53,137 +88,6 @@ while true
 do
   products_in_special_offer="$(\
     curl --silent "https://kompaszliav.sk/n/zelenina?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=price&storeFilterAmp-monitoringProducts-order=asc&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
-      -H 'Host: kompaszliav.sk:443' \
-      -H 'Accept: */*' \
-      -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
-      -H 'sec-ch-ua-mobile: ?0' \
-      -H 'sec-ch-ua-platform: "Linux"' \
-      -H 'Sec-Fetch-Dest: empty' \
-      -H 'Sec-Fetch-Mode: cors' \
-      -H 'Sec-Fetch-Site: same-origin' \
-      -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36' \
-      -H 'X-Requested-With: XMLHttpRequest' \
-      | grep "\{.*\"snippets\":" | sed '/"snippets"/s/":"\s*/":"\n/g' | tail -n -1 \
-      | sed 's:\\n::g' \
-      | sed 's:[\\/]&quot;::g' \
-      | sed 's/\\//g' \
-      | sed 's/^\s*//g' \
-      | sed 's:<tr>:\n<tr>:g' \
-      | sed 's:</tr>::g' \
-      | sed 's:<td>:\n<td>:g' \
-      | sed 's/<td class="price">/\n<td class="price">/g' \
-      | sed 's:</td>::g' \
-      | sed 's:\s*</div>::g' \
-      | tr --squeeze '[:space:]' \
-      | grep \
-        -e 'class="store-name"' \
-        -e 'class="desc"' \
-        -e 'class="validity-cell-wrapper"' \
-        -e 'class="price"' \
-        -e '<a href="https://kompaszliav.sk/' \
-      | sed 's/<tr class="last-detail">/\n<tr>/g' \
-      | sed 's/<tr>.*<div>/store=/g' \
-      | sed 's#<td> <a href="https://kompaszliav.sk/.*">#subcategory=#g' \
-      | sed '/subcategory=/s/\s*<\/a>//g' \
-      | sed 's/<td> <div class="desc">\s*/name=/g' \
-      | sed '/name=/s/<a href=".*$//g' \
-      | sed 's/\. - /\nuntil=/g' \
-      | sed 's/<td> <div class="validity-cell-wrapper">.*>\s*/from=/g' \
-      | sed '/until=/s/\s*<\/a>.*//g' \
-      | sed 's/<td class="price">\s*/price=/g' \
-      | sed '/price=/s/<div>\s*.*<\/p>\s*//g' \
-      | sed '/price=/s/<div>\s*//g' \
-      | sed '/price=/s/<a href="//g' \
-      | sed '/price=/s/">.*$//g' \
-      | sed '/price=/s/\s*"}}\s*//g' \
-      | sed '/price=/s/ €.*\s*//g' \
-      | sed '/price=/s/,/\./g' \
-      | sed '/price=/s/$/\n---/g' \
-  )"
-
-  if [ -z "${products_in_special_offer}" ]
-  then
-    break
-  fi
-
-  printf "%s\n" "${products_in_special_offer}" >> "${SPECIAL_OFFERS_FILE_PATH}"
-  page_index=$(( page_index + 1 ))
-done
-
-number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
-
-echo '---' >> "${SPECIAL_OFFERS_FILE_PATH}"
-echo '[ovocie - zlacnene.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
-
-for page_number in $(seq 1 "${number_of_pages}")
-do
-  curl --silent "https://www.zlacnene.sk/akciovy-tovar/ovocie/najlacnejsie/strana-${page_number}/" | sed 's#itemtype="http://schema.org/Product"#\n---\n#g' | sed 's:/"><strong>:\nstore=:g' | sed 's:</strong></a></h3>:\n:g' | sed 's/<span itemprop="name" content="\s*/\nname=/g' | sed 's/" aria-hidden="true"/\n/g' | sed 's/itemprop="price" content="/\nprice=/g' | sed 's:"></span>:\n:g' | sed 's:<i class="far fa-calendar-alt"></i> :\nfrom=:g' |  sed 's/ - <span class="platiDo">/\nuntil=/g' | sed 's:</span></p><p class="mb-1:\n:g' | grep -e "name=" -e "price=" -e "store=" -e "from=" -e "until=" -e "---" | tail -n +5 | head -n -1 >> "${SPECIAL_OFFERS_FILE_PATH}"
-done
-
-# Load special offers from kompaszliav.sk
-
-# The page gives a much broader overview of current special offers in more shops, but some entries lack price which has to be looked up manually within the catalogue
-#  and the page is protected with CloudFlare to prevent DDoS attacks which makes the page even harder to access via curl
-
-#curl --silent 'https://kompaszliav.sk/zelenina?storeFilterAmp-monitoringProducts-page=0&storeFilterAmp-monitoringProducts-column=price&storeFilterAmp-monitoringProducts-order=asc&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,kaufland,kraj,lidl,metro,potraviny-koruna,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts' \
-#  -H 'Host: kompaszliav.sk:443' \
-#  -H 'Accept: */*' \
-#  -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
-#  -H 'sec-ch-ua-mobile: ?0' \
-#  -H 'sec-ch-ua-platform: "Linux"' \
-#  -H 'Sec-Fetch-Dest: empty' \
-#  -H 'Sec-Fetch-Mode: cors' \
-#  -H 'Sec-Fetch-Site: same-origin' \
-#  -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36' \
-#  -H 'X-Requested-With: XMLHttpRequest' \
-#  | grep "\{.*\"snippets\":" | sed '/"snippets"/s/":"\s*/":"\n/g' | tail -n -1 \
-#  | sed 's:\\n::g' \
-#  | sed 's:[\\/]&quot;::g' \
-#  | sed 's/\\//g' \
-#  | sed 's/^\s*//g' \
-#  | sed 's:<tr>:\n<tr>:g' \
-#  | sed 's:</tr>::g' \
-#  | sed 's:<td>:\n<td>:g' \
-#  | sed 's/<td class="price">/\n<td class="price">/g' \
-#  | sed 's:</td>::g' \
-#  | sed 's:\s*</div>::g' \
-#  | tr --squeeze '[:space:]' \
-#  | grep \
-#    -e 'class="store-name"' \
-#    -e 'class="desc"' \
-#    -e 'class="validity-cell-wrapper"' \
-#    -e 'class="price"' \
-#    -e '<a href="https://kompaszliav.sk/' \
-#  | sed 's/<tr class="last-detail">/\n<tr>/g' \
-#  | sed 's/<tr>.*<div>/store=/g' \
-#  | sed 's#<td> <a href="https://kompaszliav.sk/.*">#subcategory=#g' \
-#  | sed '/subcategory=/s/\s*<\/a>//g' \
-#  | sed 's/<td> <div class="desc">\s*/name=/g' \
-#  | sed '/name=/s/<a href=".*$//g' \
-#  | sed 's/\. - /\nuntil=/g' \
-#  | sed 's/<td> <div class="validity-cell-wrapper">.*>\s*/from=/g' \
-#  | sed '/until=/s/\s*<\/a>.*//g' \
-#  | sed 's/<td class="price">\s*/price=/g' \
-#  | sed '/price=/s/<div>\s*.*<\/p>\s*//g' \
-#  | sed '/price=/s/<div>\s*//g' \
-#  | sed '/price=/s/<a href="//g' \
-#  | sed '/price=/s/">.*$//g' \
-#  | sed '/price=/s/\s*"}}\s*//g' \
-#  | sed '/price=/s/ €.*\s*//g' \
-#  | sed '/price=/s/,/\./g' \
-#  | sed '/price=/s/$/\n---/g' \
-#  | nl | less
-
-{
-  printf "%s\n" "---"
-  echo '[ovocie - kompaszliav.sk]'
-} >> "${SPECIAL_OFFERS_FILE_PATH}"
-
-page_index=0
-while true
-do
-  products_in_special_offer="$(\
-    curl --silent "https://kompaszliav.sk/n/ovocie?storeFilterAmp-monitoringProducts-page=${page_index}&storeFilterAmp-monitoringProducts-column=null&storeFilterAmp-monitoringProducts-order=null&storeFilterAmp-monitoringProducts-archive=0&store=billa,coop-jednota,fresh,kaufland,kraj,lidl,metro,potraviny-koruna,terno,tesco,tesco-supermarket&do=storeFilterAmp-monitoringProducts-showProducts" \
       -H 'Host: kompaszliav.sk:443' \
       -H 'Accept: */*' \
       -H 'sec-ch-ua: "Chromium";v="97", " Not;A Brand";v="99"' \
