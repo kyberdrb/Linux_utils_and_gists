@@ -54,7 +54,9 @@ do
       | sed '/storeOfProductInSpecialOffer=.*0">$/d' \
       | sed '/priceOfProductInSpecialOffer=.*0">$/d' \
       | sed '/.*class="letak-img-proklik"/d' \
-      | sed '/.*class="dispNone"/d' \
+      | sed '/<h3/d' \
+      | sed '/storeOfProductInSpecialOffer/s/ class="col-md-2 col-sm-3 col-3//g' \
+      | sed '/storeOfProductInSpecialOffer/s/span itemprop="name" class="dispNone" aria-hidden="true" content="//g' \
       | sed 's/nameOfProductInSpecialOffer/name/g' \
       | sed 's/priceOfProductInSpecialOffer/price/g' \
       | sed 's/storeOfProductInSpecialOffer/store/g' \
@@ -102,9 +104,11 @@ do
       | tail --lines=+2 \
       | sed -E 's/<td class="store-name">\s+/store=/g' \
       | sed -E 's/<div class="desc">\s+/name=/g' \
-      | sed -E 's/<div class="validity-cell-wrapper">\s+/catalogueAndUntil=/g' \
+      | sed -E 's/<div class="validity-cell-wrapper">\s+/catalogue=/g' \
+      | sed '/catalogue/s/ > /\nuntil=/g' \
       | sed -E 's/<button class="snapchat">\s+/image=/g' \
-      | sed -E 's/<td class="price">\s+/price=/g'
+      | sed -E 's/<td class="price">\s+/price=/g' \
+      | sed '/image/s/<img width="40" height="40" src="//g'
   )"
 
   if [ -z "${products_in_special_offer}" ]
@@ -176,6 +180,7 @@ echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 #- https://duckduckgo.com/?q=remove+new+line+after+pattern&ia=web
 #- https://www.unix.com/shell-programming-and-scripting/95486-sed-how-remove-newline-after-pattern.html#2
 #- https://stackoverflow.com/questions/2191989/a-command-line-html-pretty-printer-making-messy-html-readable
+#- https://stackoverflow.com/questions/2191989/a-command-line-html-pretty-printer-making-messy-html-readable/2192027#2192027
 #- https://archlinux.org/packages/community/x86_64/jq/
 #- https://itsfoss.com/pretty-print-json-linux/
 #- https://curl.se/docs/http-cookies.html
@@ -193,4 +198,19 @@ echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 #- https://duckduckgo.com/?q=bash+check+if+connected+to+network&ia=web
 #- https://stackoverflow.com/questions/929368/how-to-test-an-internet-connection-with-bash
 #- https://stackoverflow.com/questions/929368/how-to-test-an-internet-connection-with-bash/47375551#47375551
+#- https://duckduckgo.com/?q=html+prettify+pretty+print+arch+linux+package&ia=web
+#- https://stackoverflow.com/questions/2191989/a-command-line-html-pretty-printer-making-messy-html-readable
+#- https://duckduckgo.com/?q=sed+replace+everything+up+to+first+occurence+in+line&ia=web
+#- https://duckduckgo.com/?q=sed+remove+newline+matching&ia=web
+#- https://duckduckgo.com/?q=grep+multiple+patterns&ia=web
+#- https://phoenixnap.com/kb/grep-multiple-strings
+#- https://duckduckgo.com/?q=head+except+first+line&ia=web
+#- https://superuser.com/questions/1071448/tail-head-all-line-except-x-last-first-lines#1071451
+#- https://duckduckgo.com/?q=grep+or+conndition+regex&ia=web
+#- https://linuxtect.com/grep-or-condition-tutorial/
+#- https://duckduckgo.com/?q=sed+regex&ia=web
+#- https://duckduckgo.com/?q=sed+%5Cd+regex&ia=web
+#- https://stackoverflow.com/questions/14671293/why-doesnt-d-work-in-regular-expressions-in-sed#14671365
+#- https://duckduckgo.com/?q=sed+delete+line+matching+pattern&ia=web
+#- https://kifarunix.com/delete-lines-matching-a-specific-pattern-in-a-file-using-sed/
 
