@@ -45,36 +45,23 @@ do
 
   for URL_for_product_in_special_offer in ${URLs_for_all_products_from_current_page}
   do
-    # FOR DEBUGGING PURPOSES
-    #echo ${URL_for_product_in_special_offer}
-
     curl --silent "${URL_for_product_in_special_offer}" \
-      | tidy -quiet 2>/dev/null \
-      | sed 's/<h1 class="nadpis-zbozi" itemprop="name">/nameOfProductInSpecialOffer=/g' \
-      | sed 's/<p class="mb-1" itemprop="price" content="/priceOfProductInSpecialOffer=/g' \
-      | sed 's/<p class="fs-20 fw-bold color-red mb-0 d-inline-block">/priceOfProductInSpecialOffer=/g' \
-      | sed '/itemprop="url">/s/^"/storeOfProductInSpecialOffer=/g' \
-      | sed '/itemprop="url">/s/" itemprop="url".*//g' \
-      | sed '/storeOfProductInSpecialOffer=<img src=/d' \
-      | sed 's/<h2 class="col-12 fs-18 fs-m-15 fw-bold mb-0">/storeOfProductInSpecialOffer=/g' \
-      | sed -E 's/^content="[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}">/specialOfferValidUntil=/g' \
-      | sed '/^"\/letak\/.*class=/s/^"/catalogue=https:\/\/www\.zlacnene\.sk/g' \
-      | sed '/catalogue=.*class="letak-img-proklik"/d' \
+      | sed 's/<h1 class="nadpis-zbozi" itemprop="name">/\nnameOfProductInSpecialOffer=/g' \
+      | sed 's/itemtype="http:\/\/schema.org\/Organization"/\nstoreOfProductInSpecialOffer=/g' \
+      | sed 's/itemprop="price" content="/\npriceOfProductInSpecialOffer=/g' \
+      | sed 's/itemprop="priceValidUntil" content="/\nspecialOfferValidUntil=/g' \
       | grep -e 'nameOfProductInSpecialOffer' -e 'priceOfProductInSpecialOffer' -e 'storeOfProductInSpecialOffer' -e 'specialOfferValidUntil' -e 'catalogue' \
-      | sed '/nameOfProductInSpecialOffer/s/<\/h1>//g' \
-      | sed '/storeOfProductInSpecialOffer/s/<\/h2>//g' \
-      | sed '/storeOfProductInSpecialOffer/s/retezec-ico" title="//g' \
-      | sed '/priceOfProductInSpecialOffer/s/">Akčná cena://g' \
-      | sed '/priceOfProductInSpecialOffer/s/<\/p>//g' \
-      | sed '/specialOfferValidUntil/s/Platí do: <strong>//g' \
-      | sed '/specialOfferValidUntil/s/<\/strong>.*//g' \
-      | sed '/catalogue/s/" class=$//g' \
-      | uniq \
+      | sed '/storeOfProductInSpecialOffer=.*0">$/d' \
+      | sed '/priceOfProductInSpecialOffer=.*0">$/d' \
+      | sed '/.*class="letak-img-proklik"/d' \
+      | sed '/.*class="dispNone"/d' \
       | sed 's/nameOfProductInSpecialOffer/name/g' \
       | sed 's/priceOfProductInSpecialOffer/price/g' \
       | sed 's/storeOfProductInSpecialOffer/store/g' \
       | sed 's/specialOfferValidUntil/until/g' \
       | less >> "${SPECIAL_OFFERS_FILE_PATH}"
+
+      printf "%s%s\n" "link=" "${URL_for_product_in_special_offer}" >> "${SPECIAL_OFFERS_FILE_PATH}"
 
     printf "%s\n" "---" >> "${SPECIAL_OFFERS_FILE_PATH}"
   done
@@ -98,42 +85,26 @@ do
       -H 'Sec-Fetch-Site: same-origin' \
       -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36' \
       -H 'X-Requested-With: XMLHttpRequest' \
-      | grep "\{.*\"snippets\":" | sed '/"snippets"/s/":"\s*/":"\n/g' | tail -n -1 \
-      | sed 's:\\n::g' \
-      | sed 's:[\\/]&quot;::g' \
-      | sed 's/\\//g' \
-      | sed 's/^\s*//g' \
-      | sed 's:<tr>:\n<tr>:g' \
-      | sed 's:</tr>::g' \
-      | sed 's:<td>:\n<td>:g' \
-      | sed 's/<td class="price">/\n<td class="price">/g' \
-      | sed 's:</td>::g' \
-      | sed 's:\s*</div>::g' \
-      | tr --squeeze '[:space:]' \
-      | grep \
-        -e 'class="store-name"' \
-        -e 'class="desc"' \
-        -e 'class="validity-cell-wrapper"' \
-        -e 'class="price"' \
-        -e '<a href="https://kompaszliav.sk/' \
-      | sed 's/<tr class="last-detail">/\n<tr>/g' \
-      | sed 's/<tr>.*<div>/store=/g' \
-      | sed 's#<td> <a href="https://kompaszliav.sk/.*">#subcategory=#g' \
-      | sed '/subcategory=/s/\s*<\/a>//g' \
-      | sed 's/<td> <div class="desc">\s*/name=/g' \
-      | sed '/name=/s/<a href=".*$//g' \
-      | sed 's/\. - /\nuntil=/g' \
-      | sed 's/<td> <div class="validity-cell-wrapper">.*>\s*/from=/g' \
-      | sed '/until=/s/\s*<\/a>.*//g' \
-      | sed 's/<td class="price">\s*/price=/g' \
-      | sed '/price=/s/<div>\s*.*<\/p>\s*//g' \
-      | sed '/price=/s/<div>\s*//g' \
-      | sed '/price=/s/<a href="//g' \
-      | sed '/price=/s/">.*$//g' \
-      | sed '/price=/s/\s*"}}\s*//g' \
-      | sed '/price=/s/ €.*\s*//g' \
-      | sed '/price=/s/,/\./g' \
-      | sed '/price=/s/$/\n---/g' \
+      | grep "\{.*\"snippets\":" \
+      | sed '/"snippets"/s/":"\s*/":"\n/g' \
+      | tail --lines=1 \
+      | sed -E 's/\s+/ /g' \
+      | sed 's/\\n/ /g' \
+      | sed -E 's/\s+/ /g' \
+      | sed 's/\\"/"/g' \
+      | sed -E 's/<td class="store-name">/\n<td class="store-name">/g' \
+      | sed -E 's/<div class="desc">/\n<div class="desc">/g' \
+      | sed -E 's/<div class="validity-cell-wrapper">/\n<div class="validity-cell-wrapper">/g' \
+      | sed -E 's/<button class="snapchat">/\n<button class="snapchat">/g' \
+      | sed -E 's/<td class="price"/\n<td class="price"/g' \
+      | sed -E 's/<\/tr> <tr>/<\/tr> <tr>\n---/g' \
+      | sed -E 's/<\/td> <\/tr> "}}$/<\/td> <\/tr> "}}\n---/g' \
+      | tail --lines=+2 \
+      | sed -E 's/<td class="store-name">\s+/store=/g' \
+      | sed -E 's/<div class="desc">\s+/name=/g' \
+      | sed -E 's/<div class="validity-cell-wrapper">\s+/catalogueAndUntil=/g' \
+      | sed -E 's/<button class="snapchat">\s+/image=/g' \
+      | sed -E 's/<td class="price">\s+/price=/g'
   )"
 
   if [ -z "${products_in_special_offer}" ]
