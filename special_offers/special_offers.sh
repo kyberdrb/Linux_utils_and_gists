@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#set -x
+
 # TODO rework into C++
 #  - download special offers from links in txt file
 #  - sort the list
@@ -26,7 +28,13 @@ cat /dev/null > "${SPECIAL_OFFERS_FILE_PATH}"
 
 # Load special offers from zlacnene.sk
 
-number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
+#number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep '<span class="qc-sel">' | sed 's:</option></select></span><span>/:\nnumber_of_pages=:g' | sed 's:</span></label></div></div></div><div class=:\n</span></label></div></div></div><div class=:g' | grep "number_of_pages=" | cut -d '=' -f 2)"
+
+# TODO TEST
+number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "<\/a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
+
+# TODO TEST - funguje iba ked je pagination s tromi bodkami
+#number_of_pages="$(curl --silent "https://www.zlacnene.sk/akciovy-tovar/potraviny/najlacnejsie/strana-1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep page-link | tail --lines=2 | head --lines=1 | sed 's/"page-link">//' | sed 's/<\/a>//')"
 
 echo '[zelenina - zlacnene.sk]' >> "${SPECIAL_OFFERS_FILE_PATH}"
 
