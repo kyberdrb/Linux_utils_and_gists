@@ -57,6 +57,7 @@ do
       | sed '/<h3/d' \
       | sed '/storeOfProductInSpecialOffer/s/ class="col-md-2 col-sm-3 col-3//g' \
       | sed '/storeOfProductInSpecialOffer/s/span itemprop="name" class="dispNone" aria-hidden="true" content="//g' \
+      | sed '/storeOfProductInSpecialOffer/s/ zbozi-prodejce//g' \
       | sed 's/nameOfProductInSpecialOffer/name/g' \
       | sed 's/priceOfProductInSpecialOffer/price/g' \
       | sed 's/storeOfProductInSpecialOffer/store/g' \
