@@ -109,7 +109,14 @@ do
       | sed '/catalogue/s/ > /\nuntil=/g' \
       | sed -E 's/<button class="snapchat">\s+/image=/g' \
       | sed -E 's/<td class="price">\s+/price=/g' \
-      | sed '/image/s/<img width="40" height="40" src="//g'
+      | sed '/image/s/<img width="40" height="40" src="//g' \
+      | sed '/price/s/<sup class="note-index">\*<\/sup> <\/p> <\/div>//g' \
+      | sed -E '/store/s/alt="\w*" title="/\nstoreName=/g' \
+      | sed -E '/store/s/alt="COOP Jednota" title="/\nstoreName=/g' \
+      | sed '/storeName/s/" title="/\ncategory=/g' \
+      | sed '/price/s/<a href=".*title="//g' \
+      | sed '/catalogue/s/<a href="//g' \
+      | sed '/catalogue/s/"$//g'
   )"
 
   if [ -z "${products_in_special_offer}" ]
