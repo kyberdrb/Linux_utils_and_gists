@@ -221,4 +221,5 @@ echo "Prices for 'METRO' on the page 'kompaszliav.sk' are without VAT."
 #- https://stackoverflow.com/questions/14671293/why-doesnt-d-work-in-regular-expressions-in-sed#14671365
 #- https://duckduckgo.com/?q=sed+delete+line+matching+pattern&ia=web
 #- https://kifarunix.com/delete-lines-matching-a-specific-pattern-in-a-file-using-sed/
+#- https://duckduckgo.com/?q=sed+replace+multiple+characters&ia=web
 
