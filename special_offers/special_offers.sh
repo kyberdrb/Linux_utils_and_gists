@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -x
+set -x
 
 # TODO rework into C++
 #  - download special offers from links in txt file
@@ -33,6 +33,11 @@ NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL="https://www.zlacnene.sk/akciovy-tova
 
 number_of_pages="$(curl --silent "${NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL}1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "<\/a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
 
+if [ -z "${number_of_pages}" ]
+then
+  number_of_pages=1
+fi
+
 {
   echo '[zelenina - zlacnene.sk]'
   printf "%s\n" "---"
@@ -61,8 +66,7 @@ do
       | sed 's/nameOfProductInSpecialOffer/name/g' \
       | sed 's/priceOfProductInSpecialOffer/price/g' \
       | sed 's/storeOfProductInSpecialOffer/store/g' \
-      | sed 's/specialOfferValidUntil/until/g' \
-      | less >> "${SPECIAL_OFFERS_FILE_PATH}"
+      | sed 's/specialOfferValidUntil/until/g' >> "${SPECIAL_OFFERS_FILE_PATH}"
 
       printf "%s%s\n" "link=" "${URL_for_product_in_special_offer}" >> "${SPECIAL_OFFERS_FILE_PATH}"
 
