@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+#set -x
 
 # TODO rework into C++
 #  - download special offers from links in txt file
