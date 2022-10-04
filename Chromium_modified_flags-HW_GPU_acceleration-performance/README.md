@@ -42,14 +42,13 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
 
 ## Sources
 
-[Chromium modified flags - Source](https://gist.github.com/ibLeDy/1495735312943b9dd646fd9ddf618513)
-
-Example of `chromium-flags.conf` for full HW video acceleration - https://bbs.archlinux.org/viewtopic.php?pid=1868591#p1868591
-
-egl backend broken :( - using `--use-gl=desktop` instead - https://bbs.archlinux.org/viewtopic.php?pid=1923456#p1923456
-
-desktop backend possibly working - https://bbs.archlinux.org/viewtopic.php?pid=1923532#p1923532
-
-[Chromium is intermittently very choppy](https://bbs.archlinux.org/viewtopic.php?pid=1788065#p1788065)
-
-[VAAPI/Intel acceleration in Chromium 87 on Ubuntu 20.04 broken on initialization with `VDA Error 4` #98](https://github.com/saiarcot895/chromium-ubuntu-build/issues/98#issuecomment-711220942)
+- [Chromium modified flags - Source](https://gist.github.com/ibLeDy/1495735312943b9dd646fd9ddf618513)
+- Example of `chromium-flags.conf` for full HW video acceleration - https://bbs.archlinux.org/viewtopic.php?pid=1868591#p1868591
+- egl backend broken :( - using `--use-gl=desktop` instead - https://bbs.archlinux.org/viewtopic.php?pid=1923456#p1923456
+- desktop backend possibly working - https://bbs.archlinux.org/viewtopic.php?pid=1923532#p1923532
+- [Chromium is intermittently very choppy](https://bbs.archlinux.org/viewtopic.php?pid=1788065#p1788065)
+- [VAAPI/Intel acceleration in Chromium 87 on Ubuntu 20.04 broken on initialization with `VDA Error 4` #98](https://github.com/saiarcot895/chromium-ubuntu-build/issues/98#issuecomment-711220942)
+- Google: --enable-dr-dc --enable-raw-draw chrome
+- https://forum.manjaro.org/t/howto-enable-hardware-video-acceleration-video-decode-in-google-chrome-brave-vivaldi-and-opera-browsers/51895/51
+- https://www.chromium.org/developers/how-tos/run-chromium-with-flags/
+- https://peter.sh/experiments/chromium-command-line-switches/
