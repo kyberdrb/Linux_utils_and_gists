@@ -38,6 +38,25 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
     - `--enable-native-gpu-memory-buffers` - [Source](https://software.intel.com/content/www/us/en/develop/articles/zero-copy-texture-uploads-in-chrome-os.html)
     - `--force-gpu-rasterization` - [Description](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization)
     - `--enable-impl-side-painting` - [Explanation](http://www.chromium.org/developers/design-documents/impl-side-painting) - [Is it already enabled by default?](https://codereview.chromium.org/830273003/)
+    - `--disable-software-rasterizer` - ?
+    - `--disable-gpu-driver-workarounds` - ?
+    - `--disable-features=UseChromeOSDirectVideoDecoder` - ?
+    - `--enable-accelerated-2d-canvas` - sets `Canvas:` to `Hardware accelerated`
+    - `--enable-accelerated-video-decode` - ?
+    - `--enable-accelerated-mjpeg-decode` - ?
+    - `--enable-drdc` - sets `Direct Rendering Display Compositor:` to `Enabled`
+
+    - `--enable-features=ParallelDownloading,UnexpireFlagsM90,VaapiVideoEncoder,VaapiVideoDecoder,CanvasOopRasterization,RawDraw,EnableDrDc`
+    - `VaapiVideoDecoder` sets `Video Decode:` to `Hardware accelerated` from `Software only. Hardware acceleration disabled`
+    - `VaapiVideoEncoder` sets `Video Encode:` to `Hardware accelerated` from `Software only. Hardware acceleration disabled`
+
+    - `--enable-gpu-compositing` - sets `Compositing:` to `Hardware accelerated`
+    - `--enable-native-gpu-memory-buffers` - ?
+    - `--enable-gpu-rasterization` - sets `Rasterization:` to `Hardware accelerated`
+    - `--enable-oop-rasterization` - sets `Canvas out-of-process rasterization:` to `Enabled`
+    - `--enable-raw-draw` - sets `Raw Draw:` to `Enabled`
+    - `--ignore-gpu-blocklist` - ?
+    - `--num-raster-threads=6` - sets `Multiple Raster Threads:` to `Force enabled`?
 
 
 ## Sources
