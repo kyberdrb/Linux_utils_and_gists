@@ -1,4 +1,4 @@
-# Chromium - faster and more efficient
+# Chromium - offload more work to GPU to unburden the CPU - more fluent video output with less strain on the system, with more balanced workloads which results possibly in a less energy consuming computer
 
 ## Usage
 
