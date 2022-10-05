@@ -56,7 +56,9 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
     - `--enable-oop-rasterization` - sets `Canvas out-of-process rasterization:` to `Enabled`
     - `--enable-raw-draw` - sets `Raw Draw:` to `Enabled`
     - `--ignore-gpu-blocklist` - ?
-    - `--num-raster-threads=6` - sets `Multiple Raster Threads:` to `Force enabled`; number of threads is an arbitrary positive whole number - experiment what gives you low system load and most fluent streamed video playback
+    - `--num-raster-threads=6` - sets `Multiple Raster Threads:` to `Force enabled`; number of threads is an arbitrary positive whole number - experiment what gives you low system load and most fluent streamed video playback;
+        - `4` for iGPU in G3258
+        - `16` for iGPU `Intel HD 520` in `i5-6300U`
 
 ## Sources
 
