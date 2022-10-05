@@ -34,7 +34,7 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
     - [`MojoVideoDecoder`, i. e. VAAPI acceleration in Chromium](https://github.com/saiarcot895/chromium-ubuntu-build/issues/98#issuecomment-711220942) is in the Chromium v88.0.4324 enabled by default without the need of a `--use-gl` flag on AMD Radeon R3/8400 and, apparently Intel GPUs, although mine HD 520 worked out of the box with Chromium [and Firefox], and libva hybrid drivers or intel media drivers for VAAPI acceleration. `--use-gl=egl` doesn't work either, as it doesn't enable the MojoVideoDecoder. Only deleting the flag `--use-gl` enables the GPU video decoding with MojoVideoDecoder.
     - `--enable-oop-rasterization` enables `Out-of-process Rasterization: Hardware accelerated` in `chrome://gpu` - [Chromium flags](https://www.reddit.com/r/vscode/comments/fp6zao/how_do_i_pass_chromium_flags_to_vs_code/)
     - `--disable-gpu-driver-bug-workarounds` sometimes lowers the CPU strain at video playback - [Chromium screen tearing fix](https://www.reddit.com/r/archlinux/comments/8n5w7z/chromiumchrome_full_screen_videos_screen_tearing/), [Chromium screen tearing fix - original answer](https://bbs.archlinux.org/viewtopic.php?pid=1788065#p1788065)
-    - `--enable-zero-copy` changes `Tile Update Mode` from `One-copy` to `Zero-copy` - faster rendering - [Source](https://www.ghacks.net/2017/01/31/chromes-rendering-gets-faster-here-is-what-google-does-not-tell-you/)
+    - `--enable-zero-copy` changes `Tile Update Mode` from `One-copy` to `Zero-copy` - faster rendering, although I experienced more microstutters that with One-Copy on Intel iGPU - [Source](https://www.ghacks.net/2017/01/31/chromes-rendering-gets-faster-here-is-what-google-does-not-tell-you/), [Reddit comment](https://www.reddit.com/r/chromeos/comments/2xahwh/comment/hlzs7x2/?utm_source=reddit&utm_medium=web2x&context=3)
     - `--enable-native-gpu-memory-buffers` - [Source](https://software.intel.com/content/www/us/en/develop/articles/zero-copy-texture-uploads-in-chrome-os.html)
     - `--force-gpu-rasterization` - [Description](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization)
     - `--enable-impl-side-painting` - [Explanation](http://www.chromium.org/developers/design-documents/impl-side-painting) - [Is it already enabled by default?](https://codereview.chromium.org/830273003/)
@@ -52,12 +52,11 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
 
     - `--enable-gpu-compositing` - sets `Compositing:` to `Hardware accelerated`
     - `--enable-native-gpu-memory-buffers` - ?
-    - `--enable-gpu-rasterization` - sets `Rasterization:` to `Hardware accelerated`
+    - `--enable-gpu-rasterization` - sets `Rasterization:` to `Hardware accelerated` or to `Hardware accelerated on all pages`
     - `--enable-oop-rasterization` - sets `Canvas out-of-process rasterization:` to `Enabled`
     - `--enable-raw-draw` - sets `Raw Draw:` to `Enabled`
     - `--ignore-gpu-blocklist` - ?
-    - `--num-raster-threads=6` - sets `Multiple Raster Threads:` to `Force enabled`?
-
+    - `--num-raster-threads=6` - sets `Multiple Raster Threads:` to `Force enabled`; number of threads is an arbitrary positive whole number - experiment what gives you low system load and most fluent streamed video playback
 
 ## Sources
 
@@ -71,3 +70,4 @@ Configurationsl were tested on Intel iGPU HD Graphics 520 of i5-6300U (Skylake) 
 - https://forum.manjaro.org/t/howto-enable-hardware-video-acceleration-video-decode-in-google-chrome-brave-vivaldi-and-opera-browsers/51895/51
 - https://www.chromium.org/developers/how-tos/run-chromium-with-flags/
 - https://peter.sh/experiments/chromium-command-line-switches/
+

@@ -1,19 +1,3 @@
---disable-software-rasterizer
---disable-gpu-driver-workarounds
---disable-gpu-vsync
---disable-features=UseChromeOSDirectVideoDecoder
---enable-accelerated-2d-canvas
---enable-accelerated-video-decode
---enable-accelerated-mjpeg-decode
---enable-drdc
---enable-features=ParallelDownloading,UnexpireFlagsM90,VaapiVideoEncoder,VaapiVideoDecoder,CanvasOopRasterization,RawDraw,EnableDrDc
---enable-gpu-compositing
---enable-native-gpu-memory-buffers
---enable-gpu-rasterization
---enable-oop-rasterization
---enable-raw-draw
---enable-zero-copy
---ignore-gpu-blocklist
---use-gl=desktop
---num-raster-threads=6
+--enable-features=CanvasOopRasterization,RawDraw,VaapiVideoDecoder,VaapiVideoEncoder,ParallelDownloading
+--num-raster-threads=2
 
