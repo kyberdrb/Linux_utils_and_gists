@@ -31,7 +31,7 @@ cat /dev/null > "${SPECIAL_OFFERS_FILE_PATH}"
 NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL="https://www.zlacnene.sk/akciovy-tovar/zelenina/najlacnejsie/strana-"
 #NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL="https://www.zlacnene.sk/akciovy-tovar/sk-potraviny/najlacnejsie/strana-"
 
-number_of_pages="$(curl --silent "${NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL}1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "<\/a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
+number_of_pages="$(curl --silent "${NAJLACNEJSIA_ZELENINA_ZLACNENE_SK_BASE_URL}1/" | grep page-link | tidy -omit -quiet 2>/dev/null | grep "</a>" | tail --lines=2 | head --lines=1 | sed 's/<\/a>//' | sed 's/>/\n/' | tail --lines=1)"
 
 if [ -z "${number_of_pages}" ]
 then
@@ -92,7 +92,7 @@ do
       -H 'Sec-Fetch-Site: same-origin' \
       -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36' \
       -H 'X-Requested-With: XMLHttpRequest' \
-      | grep "\{.*\"snippets\":" \
+      | grep "{.*\"snippets\":" \
       | sed '/"snippets"/s/":"\s*/":"\n/g' \
       | tail --lines=1 \
       | sed -E 's/\s+/ /g' \
