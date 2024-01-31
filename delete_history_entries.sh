@@ -1,12 +1,20 @@
 #!/bin/sh
 
-#set -x
+set -x
+
+#history | tac | head --lines=1 | sed 's/^\s*//g' | cut --delimiter=' ' --fields=1
 
 TO="${1}"
 
 if [ -z "${TO}" ]
 then
   echo "Parameter 'TO' has to be defined."
+    echo ""
+    echo "Usage: source $(basename $0) <TO> [FROM]"
+    echo "e.g."
+    echo "    source $(basename $0) 400"
+    echo "    source $(basename $0) 400 395"
+    echo ""
   exit 1
 fi
 
@@ -26,12 +34,12 @@ do
     echo "    source $(basename $0) 400"
     echo "    source $(basename $0) 400 395"
     echo ""
-    break
+    exit 1
   fi
 
 done
 
-#set +x
+set +x
 
 echo "Verify deletion with command"
 echo "    history | tac | less"
