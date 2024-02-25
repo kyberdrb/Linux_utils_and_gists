@@ -2,39 +2,38 @@
 
 set -x
 
-#history | tac | head --lines=1 | sed 's/^\s*//g' | cut --delimiter=' ' --fields=1
-
 TO="${1}"
 
 if [ -z "${TO}" ]
 then
   echo "Parameter 'TO' has to be defined."
+    set +x
     echo ""
-    echo "Usage: source $(basename $0) <TO> [FROM]"
+    echo "Usage: source $(basename $0) <TO> [FROM_THIS_INDEX_UPWARDS]"
     echo "e.g."
-    echo "    source $(basename $0) 400"
-    echo "    source $(basename $0) 400 395"
+    echo "    source delete_history_entries.sh 400"
+    echo "    source delete_history_entries.sh 400 395"
     echo ""
-  exit 1
+    echo "Last line number in 'history':"
+    echo "$(history | tac | head --lines=1 | tr --delete ' ' | cut --delimiter=' ' --fields=1)"
 fi
 
-FROM="${2:-${TO}}"
+FROM_THIS_INDEX_UPWARDS="${2:-${TO}}"
 
-NUMBER_OF_ENTRIES=$(( TO - FROM + 1))
+NUMBER_OF_ENTRIES=$(( TO - FROM_THIS_INDEX_UPWARDS + 1))
 
 for history_entry_index in $(seq 1 ${NUMBER_OF_ENTRIES})
 do
-  #echo "${FROM}"
-  history -d ${FROM}
+  #echo "${FROM_THIS_INDEX_UPWARDS}"
+  history -d ${FROM_THIS_INDEX_UPWARDS}
 
   if [ $? -ne 0 ]
   then
-    echo "Usage: source $(basename $0) <TO> [FROM]"
+    echo "Usage: source $(basename $0) <TO> [FROM_THIS_INDEX_UPWARDS]"
     echo "e.g."
     echo "    source $(basename $0) 400"
     echo "    source $(basename $0) 400 395"
     echo ""
-    exit 1
   fi
 
 done
