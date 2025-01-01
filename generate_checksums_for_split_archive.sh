@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#set -x
+set -x
 
 # for example "archive.7z.001"
 SPLIT_ARCHIVE_FIRST_PART_PATH="$1"
